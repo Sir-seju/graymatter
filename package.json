@@ -1,0 +1,49 @@
+{
+  "name": "typora-clone",
+  "private": true,
+  "version": "0.1.0",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "ELECTRON_RUN_AS_NODE= vite",
+    "build": "tsc && vite build && electron-builder",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tiptap/extension-character-count": "^2.10.3",
+    "@tiptap/extension-code-block-lowlight": "^2.10.3",
+    "@tiptap/extension-highlight": "^2.10.3",
+    "@tiptap/extension-image": "^2.10.3",
+    "@tiptap/extension-typography": "^2.10.3",
+    "@tiptap/extensions": "^3.13.0",
+    "@tiptap/pm": "^2.10.3",
+    "@tiptap/react": "^2.10.3",
+    "@tiptap/starter-kit": "^2.10.3",
+    "clsx": "^2.0.0",
+    "katex": "^0.16.9",
+    "lowlight": "^3.1.0",
+    "lucide-react": "^0.300.0",
+    "marked": "^11.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.0.0",
+    "tiptap-markdown": "^0.9.0",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.7",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@types/turndown": "^5.0.4",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vite-plugin-electron": "^0.28.0",
+    "vite-plugin-electron-renderer": "^0.14.5"
+  }
+}

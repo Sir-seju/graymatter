@@ -1,0 +1,591 @@
+@import 'katex/dist/katex.min.css';
+@import 'highlight.js/styles/github-dark.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --side-bar-bg-color: #fafafa;
+  --window-border: #e5e5e5;
+  --active-file-bg-color: #e8e8e8;
+  --active-file-text-color: #333333;
+  --item-hover-bg-color: #f0f0f0;
+  --control-text-color: #666666;
+  --primary-color: #4a89dc;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow: hidden;
+}
+
+/* Sidebar styling using CSS variables */
+.sidebar {
+  background-color: var(--side-bar-bg-color);
+  color: var(--control-text-color);
+  border-right: 1px solid var(--window-border);
+}
+
+.sidebar-item:hover {
+  background-color: var(--item-hover-bg-color);
+}
+
+.sidebar-item.active {
+  background-color: var(--active-file-bg-color);
+  color: var(--active-file-text-color);
+}
+
+/* Editor area */
+#write,
+.ProseMirror {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Code blocks */
+pre.hljs,
+pre code,
+.code-block {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.dark pre.hljs,
+.dark pre code,
+.dark .code-block {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Hide scrollbar for no-scrollbar class */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Source Mode Textarea */
+.source-mode-textarea {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  line-height: 1.5;
+}
+
+/* ============================================
+   MARKDOWN TYPOGRAPHY - Proper H1/H2/H3/etc styling
+   ============================================ */
+
+#write,
+.ProseMirror {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 30px 60px 100px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+/* Headings */
+.ProseMirror h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--window-border);
+  line-height: 1.3;
+}
+
+.ProseMirror h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+}
+
+.ProseMirror h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
+}
+
+.ProseMirror h4 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror h5,
+.ProseMirror h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Paragraphs */
+.ProseMirror p {
+  margin-bottom: 0.8rem;
+  line-height: 1.7;
+}
+
+/* Lists */
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+
+.ProseMirror li>p {
+  margin-bottom: 0.25rem;
+}
+
+/* Ordered List Numbers */
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror ol li::marker {
+  font-weight: 500;
+}
+
+/* Blockquotes */
+.ProseMirror blockquote {
+  border-left: 4px solid var(--primary-color);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--control-text-color);
+  font-style: italic;
+}
+
+/* Code Blocks */
+.ProseMirror pre {
+  background-color: #282c34;
+  color: #abb2bf;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ProseMirror code {
+  background-color: rgba(0, 0, 0, 0.06);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+/* Dark mode code */
+.dark .ProseMirror code {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Links */
+.ProseMirror a {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+/* Horizontal Rule */
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--window-border);
+  margin: 2rem 0;
+}
+
+/* Strong/Bold and Italic */
+.ProseMirror strong {
+  font-weight: 700;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+/* Tables */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid var(--window-border);
+  padding: 0.5rem 1rem;
+  text-align: left;
+}
+
+.ProseMirror th {
+  background-color: var(--side-bar-bg-color);
+  font-weight: 600;
+}
+
+/* Task Lists */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* ============================================
+   NIGHT THEME - Premium Dark Theme Styling
+   Based on Typora's Night theme
+   ============================================ */
+
+.theme-night {
+  --bg-color: #363B40;
+  --text-color: #b8bfc6;
+  --side-bar-bg-color: #2E3033;
+  --window-border: #555555;
+  --active-file-bg-color: #222222;
+  --active-file-text-color: #ffffff;
+  --item-hover-bg-color: #70717d;
+  --control-text-color: #b7b7b7;
+  --primary-color: #6dc1e7;
+  --heading-color: #DEDEDE;
+  --code-bg-color: #333333;
+  --blockquote-border-color: #474d54;
+  --selection-bg-color: #4a89dc;
+}
+
+.theme-night,
+.theme-night body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Night Theme - Headings */
+.theme-night .ProseMirror h1,
+.theme-night .ProseMirror h2,
+.theme-night .ProseMirror h3,
+.theme-night .ProseMirror h4,
+.theme-night .ProseMirror h5,
+.theme-night .ProseMirror h6 {
+  color: var(--heading-color);
+  font-family: "Lucida Grande", "Corbel", -apple-system, sans-serif;
+  font-weight: normal;
+}
+
+.theme-night .ProseMirror h1 {
+  font-size: 2.5rem;
+  letter-spacing: -1.5px;
+  margin-bottom: 1.5rem;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.theme-night .ProseMirror h2 {
+  font-size: 1.63rem;
+  letter-spacing: -1px;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.theme-night .ProseMirror h3 {
+  font-size: 1.17rem;
+  letter-spacing: -1px;
+  font-weight: bold;
+}
+
+.theme-night .ProseMirror h4 {
+  color: white;
+}
+
+/* Night Theme - Strong/Bold */
+.theme-night .ProseMirror strong {
+  color: var(--heading-color);
+}
+
+/* Night Theme - Links */
+.theme-night .ProseMirror a {
+  color: #e0e0e0;
+  text-decoration: underline;
+  transition: color 0.2s ease-in-out;
+}
+
+.theme-night .ProseMirror a:hover {
+  color: #ffffff;
+}
+
+/* Night Theme - Blockquotes */
+.theme-night .ProseMirror blockquote {
+  border-left: 2px solid var(--blockquote-border-color);
+  padding-left: 30px;
+  margin-left: 1.875rem;
+  margin-top: 35px;
+  color: #9DA2A6;
+  font-style: normal;
+}
+
+/* Night Theme - Code Blocks */
+.theme-night .ProseMirror pre,
+.theme-night .code-block-wrapper {
+  background-color: var(--code-bg-color);
+  border: none;
+  border-radius: 0;
+}
+
+.theme-night .ProseMirror pre code {
+  color: #b8bfc6;
+}
+
+/* Night Theme - Inline Code */
+.theme-night .ProseMirror code {
+  background-color: rgba(0, 0, 0, 0.15);
+  color: #b8bfc6;
+  padding: 2px 5px;
+}
+
+/* Night Theme - Syntax Highlighting Colors */
+.theme-night .hljs-keyword {
+  color: #C88FD0;
+}
+
+.theme-night .hljs-tag {
+  color: #7DF46A;
+}
+
+.theme-night .hljs-attr {
+  color: #7575E4;
+}
+
+.theme-night .hljs-string {
+  color: #D26B6B;
+}
+
+.theme-night .hljs-comment {
+  color: #DA924A;
+}
+
+.theme-night .hljs-title {
+  color: #8d8df0;
+}
+
+.theme-night .hljs-number {
+  color: #64AB8F;
+}
+
+.theme-night .hljs-variable {
+  color: #9FBAD5;
+}
+
+.theme-night .hljs-built_in {
+  color: #f3b3f8;
+}
+
+.theme-night .hljs-literal {
+  color: #84B6CB;
+}
+
+/* Night Theme - Tables */
+.theme-night .ProseMirror th,
+.theme-night .ProseMirror td {
+  border-color: var(--blockquote-border-color);
+}
+
+.theme-night .ProseMirror th {
+  background-color: var(--side-bar-bg-color);
+}
+
+/* Night Theme - HR */
+.theme-night .ProseMirror hr {
+  background-color: var(--blockquote-border-color);
+  border: none;
+  height: 2px;
+}
+
+/* Night Theme - Selection */
+.theme-night ::selection {
+  background: var(--selection-bg-color);
+  color: #fff;
+  text-shadow: none;
+}
+
+/* Night Theme - Scrollbar */
+.theme-night ::-webkit-scrollbar-thumb {
+  background: rgba(250, 250, 250, 0.3);
+}
+
+.theme-night ::-webkit-scrollbar-thumb:hover {
+  background: rgba(250, 250, 250, 0.5);
+}
+
+/* ============================================
+   NORD THEME - Cool Nordic Palette
+   ============================================ */
+
+.theme-nord {
+  --bg-color: #2E3440;
+  --text-color: #ECEFF4;
+  --side-bar-bg-color: #3B4252;
+  --window-border: #4C566A;
+  --active-file-bg-color: #434C5E;
+  --active-file-text-color: #ECEFF4;
+  --item-hover-bg-color: #4C566A;
+  --control-text-color: #D8DEE9;
+  --primary-color: #88C0D0;
+  --heading-color: #ECEFF4;
+  --code-bg-color: #3B4252;
+}
+
+.theme-nord,
+.theme-nord body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.theme-nord .ProseMirror h1,
+.theme-nord .ProseMirror h2,
+.theme-nord .ProseMirror h3,
+.theme-nord .ProseMirror h4,
+.theme-nord .ProseMirror h5,
+.theme-nord .ProseMirror h6 {
+  color: var(--heading-color);
+}
+
+.theme-nord .ProseMirror pre {
+  background-color: var(--code-bg-color);
+}
+
+/* Nord Syntax Highlighting */
+.theme-nord .hljs-keyword {
+  color: #81A1C1;
+}
+
+.theme-nord .hljs-string {
+  color: #A3BE8C;
+}
+
+.theme-nord .hljs-comment {
+  color: #616E88;
+}
+
+.theme-nord .hljs-number {
+  color: #B48EAD;
+}
+
+.theme-nord .hljs-title {
+  color: #8FBCBB;
+}
+
+.theme-nord .hljs-built_in {
+  color: #88C0D0;
+}
+
+/* ============================================
+   GITHUB THEME - Clean Light Theme
+   ============================================ */
+
+.theme-github {
+  --bg-color: #ffffff;
+  --text-color: #24292e;
+  --side-bar-bg-color: #f6f8fa;
+  --window-border: #e1e4e8;
+  --active-file-bg-color: #e1e4e8;
+  --active-file-text-color: #24292e;
+  --item-hover-bg-color: #f0f0f0;
+  --control-text-color: #586069;
+  --primary-color: #0366d6;
+  --heading-color: #24292e;
+  --code-bg-color: #f6f8fa;
+}
+
+.theme-github .ProseMirror pre {
+  background-color: var(--code-bg-color);
+  border: 1px solid var(--window-border);
+}
+
+.theme-github .ProseMirror code {
+  background-color: rgba(27, 31, 35, 0.05);
+}
+
+/* ============================================
+   CODE BLOCK WRAPPER - Improved Styling
+   ============================================ */
+
+.code-block-wrapper {
+  position: relative;
+  margin: 1rem 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-block-wrapper pre {
+  margin: 0 !important;
+  padding: 1rem !important;
+  padding-top: 2.5rem !important;
+  /* Space for copy button */
+}
+
+/* Ensure code block content is editable and styled correctly */
+.code-block-wrapper code {
+  display: block;
+  white-space: pre;
+  overflow-x: auto;
+}
