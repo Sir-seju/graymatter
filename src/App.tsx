@@ -395,58 +395,57 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         <div className="flex-1 flex flex-col h-full overflow-hidden" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
 
           {/* Tab Bar - Auto-hide with draggable area */}
-          <div
-            className="flex items-center overflow-x-auto no-scrollbar transition-all duration-300 ease-in-out"
-            style={{
-              backgroundColor: 'var(--side-bar-bg-color)',
-              borderBottom: '1px solid var(--window-border)',
-              height: isTitleBarVisible ? '35px' : '0px',
-              opacity: isTitleBarVisible ? 1 : 0,
-              overflow: 'hidden',
-              WebkitAppRegion: 'drag'
-            } as any}
-          >
-            {tabs.map(tab => {
-              const fileName = tab.path ? tab.path.split('/').pop() : 'Untitled-1';
-              const isActive = tab.id === activeTabId;
-              return (
-                <div
-                  key={tab.id}
-                  onClick={() => setActiveTabId(tab.id)}
-                  className="group flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
-                  style={{
-                    WebkitAppRegion: 'no-drag',
-                    backgroundColor: isActive ? 'var(--bg-color)' : 'transparent',
-                    color: isActive ? 'var(--text-color)' : 'var(--control-text-color)',
-                    borderRight: '1px solid var(--window-border)',
-                    borderTop: isActive ? '2px solid var(--primary-color)' : '2px solid transparent'
-                  } as any}
-                >
-                  <span className="whitespace-nowrap">{fileName}</span>
-                  {tab.isDirty && <span className="w-2 h-2 rounded-full ml-2 group-hover:hidden" style={{ backgroundColor: 'var(--primary-color)' }}></span>}
-                  <span
-                    onClick={(e) => handleCloseTab(e, tab.id)}
-                    className={`ml-2 opacity-0 group-hover:opacity-100 rounded p-0.5 hover:bg-black/10 dark:hover:bg-white/10 ${tab.isDirty ? 'hidden group-hover:block' : ''}`}
-                    style={{ color: 'var(--control-text-color)' }}
-                  >
-                    ✕
-                  </span>
-                </div>
-              );
-            })}
-            {/* New Tab Button */}
+          {isTitleBarVisible && (
             <div
-              onClick={handleNewTab}
-              className="px-3 py-1.5 cursor-pointer text-lg hover:opacity-100 opacity-60 transition-opacity"
+              className="flex items-center overflow-x-auto no-scrollbar h-[35px]"
               style={{
-                color: 'var(--control-text-color)',
-                WebkitAppRegion: 'no-drag'
+                backgroundColor: 'var(--side-bar-bg-color)',
+                borderBottom: '1px solid var(--window-border)',
+                WebkitAppRegion: 'drag'
               } as any}
-              title="New Tab"
             >
-              +
+              {tabs.map(tab => {
+                const fileName = tab.path ? tab.path.split('/').pop() : 'Untitled-1';
+                const isActive = tab.id === activeTabId;
+                return (
+                  <div
+                    key={tab.id}
+                    onClick={() => setActiveTabId(tab.id)}
+                    className="group flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
+                    style={{
+                      WebkitAppRegion: 'no-drag',
+                      backgroundColor: isActive ? 'var(--bg-color)' : 'transparent',
+                      color: isActive ? 'var(--text-color)' : 'var(--control-text-color)',
+                      borderRight: '1px solid var(--window-border)',
+                      borderTop: isActive ? '2px solid var(--primary-color)' : '2px solid transparent'
+                    } as any}
+                  >
+                    <span className="whitespace-nowrap">{fileName}</span>
+                    {tab.isDirty && <span className="w-2 h-2 rounded-full ml-2 group-hover:hidden" style={{ backgroundColor: 'var(--primary-color)' }}></span>}
+                    <span
+                      onClick={(e) => handleCloseTab(e, tab.id)}
+                      className={`ml-2 opacity-0 group-hover:opacity-100 rounded p-0.5 hover:bg-black/10 dark:hover:bg-white/10 ${tab.isDirty ? 'hidden group-hover:block' : ''}`}
+                      style={{ color: 'var(--control-text-color)' }}
+                    >
+                      ✕
+                    </span>
+                  </div>
+                );
+              })}
+              {/* New Tab Button */}
+              <div
+                onClick={handleNewTab}
+                className="px-3 py-1.5 cursor-pointer text-lg hover:opacity-100 opacity-60 transition-opacity"
+                style={{
+                  color: 'var(--control-text-color)',
+                  WebkitAppRegion: 'no-drag'
+                } as any}
+                title="New Tab"
+              >
+                +
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Editor Instance */}
           <main className="flex-1 h-full overflow-hidden relative group/editor">
