@@ -13,5 +13,8 @@ interface Window {
     copyFile: (src: string, dest: string) => Promise<{ success: boolean; error?: string }>;
     readDir: (path: string) => Promise<{ name: string; isDirectory: boolean; path: string }[]>;
     openFolder: () => Promise<string | null>;
+    watchFolder: (path: string) => Promise<{ success: boolean; error?: string }>;
+    searchFiles: (query: string, rootPath: string) => Promise<{ success: boolean; results?: Array<{ file: string; line: number; content: string }> }>;
+    showSaveDialog: () => Promise<string | null>;
   }
 }

@@ -2,7 +2,10 @@ import CharacterCount from '@tiptap/extension-character-count';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
+import TaskItem from '@tiptap/extension-task-item';
+import TaskList from '@tiptap/extension-task-list';
 import Typography from '@tiptap/extension-typography';
+import Underline from '@tiptap/extension-underline';
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { common, createLowlight } from 'lowlight';
@@ -18,6 +21,25 @@ export interface EditorHandle {
   findNext: () => void;
   findPrev: () => void;
   toggleSourceMode: () => void;
+  scrollToLine: (line: number) => void;
+  toggleBold: () => void;
+  toggleItalic: () => void;
+  toggleUnderline: () => void;
+  toggleStrike: () => void;
+  toggleHighlight: () => void;
+  toggleCode: () => void;
+  // Paragraph formatting
+  setHeading: (level: 1 | 2 | 3 | 4 | 5 | 6) => void;
+  setParagraph: () => void;
+  toggleBlockquote: () => void;
+  toggleOrderedList: () => void;
+  toggleBulletList: () => void;
+  toggleTaskList: () => void;
+  insertHorizontalRule: () => void;
+  toggleCodeBlock: () => void;
+  // Replace functionality
+  replaceCurrent: (replacement: string) => void;
+  replaceAll: (search: string, replacement: string) => void;
 }
 
 interface EditorProps {
@@ -144,17 +166,23 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
       InlineMathExtension,
       Highlight,
       Typography,
+      Underline,
       Image.configure({
         inline: true,
         allowBase64: true,
       }),
       Search,
       CharacterCount,
+      TaskItem.configure({
+        nested: true,
+      }),
+      TaskList,
       Markdown.configure({
         html: true, // Enable HTML
         breaks: false,
         transformPastedText: true,
         transformCopiedText: true,
+        bulletListMarker: '-',
         extensions: [
           // Serializers: Tiptap Nodes -> Markdown
           {
@@ -226,6 +254,83 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
     },
     toggleSourceMode: () => {
       toggleMode();
+    },
+    scrollToLine: (line: number) => {
+      if (!editor) return;
+      // Get doc content and find position of the nth line
+      const doc = editor.state.doc;
+      let pos = 0;
+      let currentLine = 0;
+      doc.descendants((node, nodePos) => {
+        if (currentLine === line) {
+          pos = nodePos;
+          return false; // stop iteration
+        }
+        if (node.isBlock) currentLine++;
+        return true;
+      });
+      // Scroll to the position
+      editor.commands.setTextSelection(pos);
+      editor.commands.scrollIntoView();
+    },
+    toggleBold: () => {
+      editor?.chain().focus().toggleBold().run();
+    },
+    toggleItalic: () => {
+      editor?.chain().focus().toggleItalic().run();
+    },
+    toggleUnderline: () => {
+      editor?.chain().focus().toggleUnderline().run();
+    },
+    toggleStrike: () => {
+      editor?.chain().focus().toggleStrike().run();
+    },
+    toggleHighlight: () => {
+      editor?.chain().focus().toggleHighlight().run();
+    },
+    toggleCode: () => {
+      editor?.chain().focus().toggleCode().run();
+    },
+    // Paragraph formatting
+    setHeading: (level: 1 | 2 | 3 | 4 | 5 | 6) => {
+      editor?.chain().focus().toggleHeading({ level }).run();
+    },
+    setParagraph: () => {
+      editor?.chain().focus().setParagraph().run();
+    },
+    toggleBlockquote: () => {
+      editor?.chain().focus().toggleBlockquote().run();
+    },
+    toggleOrderedList: () => {
+      editor?.chain().focus().toggleOrderedList().run();
+    },
+    toggleBulletList: () => {
+      editor?.chain().focus().toggleBulletList().run();
+    },
+    toggleTaskList: () => {
+      editor?.chain().focus().toggleTaskList().run();
+    },
+    insertHorizontalRule: () => {
+      editor?.chain().focus().setHorizontalRule().run();
+    },
+    toggleCodeBlock: () => {
+      editor?.chain().focus().toggleCodeBlock().run();
+    },
+    replaceCurrent: (replacement: string) => {
+      if (!editor) return;
+      // Get current selection and replace with the replacement text
+      const { from, to } = editor.state.selection;
+      if (from !== to) {
+        editor.chain().focus().deleteRange({ from, to }).insertContent(replacement).run();
+      }
+    },
+    replaceAll: (search: string, replacement: string) => {
+      if (!editor || !search) return;
+      // Get current content and replace all occurrences
+      const content = editor.getHTML();
+      const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      const newContent = content.replace(regex, replacement);
+      editor.commands.setContent(newContent);
     }
   }), [editor, toggleMode]);
 

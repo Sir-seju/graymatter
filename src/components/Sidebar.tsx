@@ -1,22 +1,28 @@
 import {
+  AlignLeft,
   ChevronDown,
   ChevronRight,
   Clipboard,
   Copy,
   File,
   FilePlus,
+  Files,
   Folder,
   FolderOpen,
   FolderPlus,
   Pencil,
+  Search,
   Trash2
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface SidebarProps {
   currentPath: string | null;
-  onFileSelect: (path: string) => void;
+  onFileSelect: (path: string, searchTerm?: string) => void;
   onClose: () => void;
+  onRename?: (oldPath: string, newPath: string) => void;
+  onScrollToLine?: (line: number) => void;
+  activeContent?: string;
 }
 
 interface FileNode {
@@ -33,14 +39,101 @@ interface ContextMenuState {
   node: FileNode | null; // null means root folder context
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, onRename, onScrollToLine, activeContent }) => {
+  const [activeTab, setActiveTab] = useState<'files' | 'search' | 'outline'>('files');
   const [rootPath, setRootPath] = useState<string | null>(null);
   const [fileTree, setFileTree] = useState<FileNode[]>([]);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [renaming, setRenaming] = useState<string | null>(null);
+  const [renamingNodeId, setRenamingNodeId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [clipboard, setClipboard] = useState<{ path: string; name: string } | null>(null);
   const [dragOverPath, setDragOverPath] = useState<string | null>(null);
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<{ file: string; line: number; content: string }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isCaseSensitive, setIsCaseSensitive] = useState(false);
+  const [isWholeWord, setIsWholeWord] = useState(false);
+  const [isRegex, setIsRegex] = useState(false);
+  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
+
+  // Group results by file
+  const groupedResults = React.useMemo(() => {
+    const groups: Record<string, Array<{ line: number; content: string }>> = {};
+    searchResults.forEach(r => {
+      if (!groups[r.file]) groups[r.file] = [];
+      groups[r.file].push({ line: r.line, content: r.content });
+    });
+    return groups;
+  }, [searchResults]);
+
+  const totalMatches = searchResults.length;
+  const totalFiles = Object.keys(groupedResults).length;
+
+  // Outline State
+  const [outline, setOutline] = useState<Array<{ level: number; text: string; line: number }>>([]);
+
+  // Parse Outline when activeContent changes
+  useEffect(() => {
+    if (activeTab === 'outline' && activeContent) {
+      const lines = activeContent.split('\n');
+      const headers = lines.map((text, index) => {
+        const match = text.match(/^(#{1,6})\s+(.*)$/);
+        if (match) {
+          // Strip markdown formatting from header text
+          let cleanText = match[2]
+            .replace(/\*\*(.+?)\*\*/g, '$1')  // Bold
+            .replace(/\*(.+?)\*/g, '$1')      // Italic
+            .replace(/_(.+?)_/g, '$1')        // Italic alt
+            .replace(/`(.+?)`/g, '$1')        // Inline code
+            .replace(/\[(.+?)\]\(.+?\)/g, '$1') // Links
+            .trim();
+          return { level: match[1].length, text: cleanText, line: index };
+        }
+        return null;
+      }).filter(item => item !== null) as Array<{ level: number; text: string; line: number }>;
+      setOutline(headers);
+    }
+  }, [activeContent, activeTab]);
+
+  // Handle Search (called by debounced effect or form submit)
+  const executeSearch = async () => {
+    if (!rootPath || !searchQuery || searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const result = await window.electron.searchFiles(searchQuery, rootPath);
+      if (result.success && result.results) {
+        setSearchResults(result.results);
+        // Auto-expand all files on new search
+        setExpandedFiles(new Set(result.results.map((r: any) => r.file)));
+      } else {
+        setSearchResults([]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced live search as you type
+  useEffect(() => {
+    if (activeTab !== 'search') return;
+    const timer = setTimeout(() => {
+      executeSearch();
+    }, 300); // 300ms debounce
+    return () => clearTimeout(timer);
+  }, [searchQuery, rootPath, activeTab]);
+
+  // Form submit still triggers immediate search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    executeSearch();
+  };
 
   useEffect(() => {
     const savedRoot = localStorage.getItem('typora-sidebar-root');
@@ -56,6 +149,20 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
+  useEffect(() => {
+    // Watch for file changes from system
+    const removeListener = window.electron.on('file-changed', () => {
+      refreshTree();
+    });
+    return () => removeListener();
+  }, [rootPath]);
+
+  // When root path changes, tell backend to watch it
+  useEffect(() => {
+    if (rootPath) {
+      window.electron.watchFolder(rootPath);
+    }
+  }, [rootPath]);
 
   const loadDirectory = async (path: string): Promise<FileNode[]> => {
     try {
@@ -144,19 +251,33 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
   };
 
   const handleRename = (node: FileNode) => {
-    setRenaming(node.path);
+    setRenamingNodeId(node.path);
     setRenameValue(node.name);
     setContextMenu(null);
   };
 
   const submitRename = async (node: FileNode) => {
-    if (renameValue && renameValue !== node.name) {
-      const dir = node.path.substring(0, node.path.lastIndexOf('/'));
-      const newPath = `${dir}/${renameValue}`;
-      await window.electron.renamePath(node.path, newPath);
-      refreshTree();
+    if (!renameValue || renameValue === node.name) {
+      setRenamingNodeId(null);
+      return;
     }
-    setRenaming(null);
+
+    try {
+      const parentPath = node.path.substring(0, node.path.lastIndexOf('/'));
+      const newPath = `${parentPath}/${renameValue}`;
+
+      const result = await window.electron.renamePath(node.path, newPath);
+      if (result.success) {
+        onRename && onRename(node.path, newPath);
+        refreshTree();
+      } else {
+        console.error("Rename failed", result.error);
+        alert(`Rename failed: ${result.error}`);
+      }
+    } catch (error: any) {
+      console.error("Rename exception", error);
+    }
+    setRenamingNodeId(null);
   };
 
   const handleNewFile = async (parentPath: string) => {
@@ -289,7 +410,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
   const renderNode = (node: FileNode, depth: number = 0) => {
     const isActive = currentPath === node.path;
     const paddingLeft = 12 + depth * 16;
-    const isRenaming = renaming === node.path;
+    const isRenaming = renamingNodeId === node.path;
     const isDragOver = dragOverPath === node.path;
 
     if (node.kind === 'directory') {
@@ -371,79 +492,220 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
 
   return (
     <div
-      className="sidebar flex flex-col h-full text-sm"
+      className="sidebar flex h-full text-sm"
       style={{
         backgroundColor: 'var(--side-bar-bg-color)',
         color: 'var(--control-text-color)'
       }}
     >
-      <div className="flex items-center justify-between px-3 py-2">
-        <span className="font-semibold text-xs tracking-wider uppercase opacity-70">FILES</span>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleOpenFolder}
-            className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity"
-            title="Open Folder"
+      {/* Left Icon Column (MarkText-style) */}
+      <div className="flex flex-col justify-between w-[45px] border-r border-gray-200 dark:border-gray-700 pt-10 pb-4">
+        <div className="flex flex-col items-center gap-2">
+          <div
+            className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 ${activeTab === 'files' ? 'bg-gray-200 dark:bg-gray-700' : 'opacity-60'}`}
+            onClick={() => setActiveTab('files')}
+            title="Files"
           >
-            <FolderOpen size={14} />
-          </button>
-          <button
-            onClick={() => rootPath && handleNewFile(rootPath)}
-            className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity"
-            title="New File"
-            disabled={!rootPath}
+            <Files size={18} />
+          </div>
+          <div
+            className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 ${activeTab === 'search' ? 'bg-gray-200 dark:bg-gray-700' : 'opacity-60'}`}
+            onClick={() => setActiveTab('search')}
+            title="Search"
           >
-            <FilePlus size={14} />
-          </button>
+            <Search size={18} />
+          </div>
+          <div
+            className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 ${activeTab === 'outline' ? 'bg-gray-200 dark:bg-gray-700' : 'opacity-60'}`}
+            onClick={() => setActiveTab('outline')}
+            title="Outline"
+          >
+            <AlignLeft size={18} />
+          </div>
         </div>
       </div>
 
-      <div
-        className={`flex-1 overflow-y-auto px-1 ${dragOverPath === rootPath ? 'ring-2 ring-inset ring-blue-400 bg-blue-50/50 dark:bg-blue-900/20' : ''}`}
-        onDragOver={handleDragOverRoot}
-        onDragLeave={handleDragLeave}
-        onDrop={(e) => {
-          // Check if it's an external file drop or internal move
-          if (e.dataTransfer.files.length > 0) {
-            handleExternalDrop(e);
-          } else if (rootPath) {
-            handleDrop(e, rootPath);
-          }
-        }}
-        onContextMenu={handleRootContextMenu}
-      >
-        {!rootPath ? (
-          <div className="flex flex-col items-center justify-center h-full space-y-2">
-            <button
-              onClick={handleOpenFolder}
-              className="px-4 py-2 rounded text-xs font-medium transition-colors"
-              style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
-            >
-              Open Folder
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div
-              className="text-xs font-semibold mb-2 px-2 py-1 truncate uppercase tracking-wider opacity-70"
-              title={rootPath}
-            >
-              {rootPath.split('/').pop()}
-            </div>
-            <div className="space-y-0.5">
-              {fileTree.map(node => renderNode(node))}
+      {/* Content Area Based on Tab */}
+      <div className="flex-1 overflow-hidden flex flex-col relative">
+
+        {/* FILES TAB */}
+        <div className={`flex-col h-full ${activeTab === 'files' ? 'flex' : 'hidden'}`}>
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+            <span className="font-semibold text-xs tracking-wider uppercase opacity-70">
+              {rootPath ? rootPath.split('/').pop() : 'NO FOLDER'}
+            </span>
+            <div className="flex items-center gap-1">
+              <button onClick={handleOpenFolder} className="p-1 rounded opacity-60 hover:opacity-100"><FolderOpen size={14} /></button>
+              <button onClick={() => rootPath && handleNewFile(rootPath)} className="p-1 rounded opacity-60 hover:opacity-100" disabled={!rootPath}><FilePlus size={14} /></button>
             </div>
           </div>
-        )}
+
+          <div
+            className={`flex-1 overflow-y-auto px-1 ${dragOverPath === rootPath ? 'ring-2 ring-inset ring-blue-400 bg-blue-50/50 dark:bg-blue-900/20' : ''}`}
+            onDragOver={handleDragOverRoot}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => {
+              if (e.dataTransfer.files.length > 0) handleExternalDrop(e);
+              else if (rootPath) handleDrop(e, rootPath);
+            }}
+            onContextMenu={handleRootContextMenu}
+          >
+            {!rootPath ? (
+              <div className="flex flex-col items-center justify-center h-full space-y-2">
+                <div className="opacity-50 text-xs">No Folder Opened</div>
+                <button onClick={handleOpenFolder} className="px-3 py-1 bg-blue-500 text-white rounded text-xs">Open Folder</button>
+              </div>
+            ) : (
+              <div className="space-y-0.5 mt-1">{fileTree.map(node => renderNode(node))}</div>
+            )}
+          </div>
+        </div>
+
+        {/* SEARCH TAB */}
+        <div className={`flex-col h-full bg-[var(--side-bar-bg-color)] ${activeTab === 'search' ? 'flex' : 'hidden'}`}>
+          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+            <form onSubmit={handleSearch} className="flex gap-1 mb-2">
+              <input
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1.5 text-xs outline-none focus:border-blue-500"
+                placeholder="Search in folder..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+                <Search size={12} />
+              </button>
+            </form>
+            {/* Search Options */}
+            <div className="flex gap-1 justify-end">
+              <button
+                onClick={() => setIsCaseSensitive(!isCaseSensitive)}
+                className={`px-2 py-0.5 text-[10px] rounded border ${isCaseSensitive ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 dark:border-gray-600 opacity-60 hover:opacity-100'}`}
+                title="Case Sensitive"
+              >Aa</button>
+              <button
+                onClick={() => setIsWholeWord(!isWholeWord)}
+                className={`px-2 py-0.5 text-[10px] rounded border ${isWholeWord ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 dark:border-gray-600 opacity-60 hover:opacity-100'}`}
+                title="Whole Word"
+              >Ab</button>
+              <button
+                onClick={() => setIsRegex(!isRegex)}
+                className={`px-2 py-0.5 text-[10px] rounded border ${isRegex ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 dark:border-gray-600 opacity-60 hover:opacity-100'}`}
+                title="Regex"
+              >.*</button>
+            </div>
+          </div>
+          {/* Results Summary */}
+          {totalMatches > 0 && (
+            <div className="px-3 py-1 text-[10px] opacity-60 border-b border-gray-100 dark:border-gray-800">
+              {totalMatches} {totalMatches === 1 ? 'match' : 'matches'} in {totalFiles} {totalFiles === 1 ? 'file' : 'files'}
+            </div>
+          )}
+          <div className="flex-1 overflow-y-auto">
+            {isSearching ? (
+              <div className="p-4 text-center opacity-50 text-xs">Searching...</div>
+            ) : (
+              totalMatches === 0 && searchQuery ? (
+                <div className="p-4 text-center opacity-40 text-xs">No results found</div>
+              ) : totalMatches === 0 ? (
+                <div className="p-4 text-center opacity-40 text-xs">Enter search term</div>
+              ) : (
+                <div>
+                  {Object.entries(groupedResults).map(([filePath, matches]) => {
+                    const isExpanded = expandedFiles.has(filePath);
+                    const fileName = filePath.split('/').pop() || filePath;
+                    return (
+                      <div key={filePath} className="border-b border-gray-100 dark:border-gray-800">
+                        {/* File Header */}
+                        <div
+                          className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => {
+                            const newSet = new Set(expandedFiles);
+                            if (isExpanded) newSet.delete(filePath);
+                            else newSet.add(filePath);
+                            setExpandedFiles(newSet);
+                          }}
+                        >
+                          <ChevronRight size={12} className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          <span className="text-xs font-semibold flex-1 truncate" title={filePath}>{fileName}</span>
+                          <span className="text-[10px] bg-gray-200 dark:bg-gray-700 px-1.5 rounded-full">{matches.length}</span>
+                        </div>
+                        {/* Matches */}
+                        {isExpanded && (
+                          <div className="pl-5 pb-1">
+                            {matches.map((m, i) => {
+                              // Highlight matched text
+                              const idx = m.content.toLowerCase().indexOf(searchQuery.toLowerCase());
+                              const before = idx >= 0 ? m.content.slice(0, idx) : m.content;
+                              const match = idx >= 0 ? m.content.slice(idx, idx + searchQuery.length) : '';
+                              const after = idx >= 0 ? m.content.slice(idx + searchQuery.length) : '';
+                              return (
+                                <div
+                                  key={i}
+                                  className="py-0.5 px-2 text-[11px] font-mono cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 truncate"
+                                  onClick={() => onFileSelect(filePath, searchQuery)}
+                                  title={`Line ${m.line}`}
+                                >
+                                  <span className="opacity-40 mr-1">{m.line}:</span>
+                                  <span>{before}</span>
+                                  <span className="bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white rounded px-0.5">{match}</span>
+                                  <span>{after}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* OUTLINE TAB */}
+        <div className={`flex-col h-full overflow-y-auto ${activeTab === 'outline' ? 'flex' : 'hidden'}`}>
+          <div className="px-3 py-2 text-xs font-semibold opacity-50 uppercase tracking-wider">Outline</div>
+          {outline.length === 0 ? (
+            <div className="p-4 text-center opacity-40 text-xs">No headers found</div>
+          ) : (
+            <div className="px-2 space-y-0.5 pb-4">
+              {outline.map((item, i) => (
+                <div
+                  key={i}
+                  className="py-1 px-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-xs truncate opacity-80 hover:opacity-100 transition-opacity"
+                  style={{
+                    marginLeft: (item.level - 1) * 12,
+                    fontSize: item.level === 1 ? '13px' : '12px',
+                    fontWeight: item.level <= 2 ? 600 : 400
+                  }}
+                  onClick={() => {
+                    if (onScrollToLine) {
+                      onScrollToLine(item.line);
+                    }
+                  }}
+                >
+                  {item.text}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
 
-      {/* Context Menu */}
+      {/* Custom Context Menu */}
       {contextMenu && (
         <div
           className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg py-1 min-w-[150px]"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* ... existing context menu content ... */}
+          {/* For brevity, omitting re-rendering of context menu content as it's large, assuming tool merges correctly. */}
+          {/* Actually, I need to provide the full replacement or use multi_replace. */}
+          {/* I will use the existing context menu logic but ensure it sits above the new bottom panel. */}
+          {/* Re-implementing context menu logic briefly for correct replacement. */}
           {/* Root folder context menu (no node selected) */}
           {contextMenu.node === null && rootPath && (
             <>
@@ -472,7 +734,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
           {/* File/Folder context menu */}
           {contextMenu.node && (
             <>
-              {/* Copy option for files */}
               {contextMenu.node.kind === 'file' && (
                 <button
                   className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
@@ -481,7 +742,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
                   <Copy size={12} /> Copy
                 </button>
               )}
-              {/* Paste option for directories */}
               {contextMenu.node.kind === 'directory' && clipboard && (
                 <button
                   className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
@@ -523,6 +783,80 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose })
           )}
         </div>
       )}
+
+
+    </div>
+  );
+};
+
+// Bottom Panel Component
+const BottomPanel: React.FC<{
+  rootPath: string | null;
+  onNewFile: () => void;
+  onOpenFolder: () => void;
+  onSwitchRoot: (path: string) => void;
+}> = ({ rootPath, onNewFile, onOpenFolder, onSwitchRoot }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const [recentLocations, setRecentLocations] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('typora-recent-locations');
+      if (stored) {
+        setRecentLocations(JSON.parse(stored));
+      }
+    } catch (e) { console.error(e); }
+  }, [rootPath]);
+
+  // Update recent locations when rootPath changes
+  useEffect(() => {
+    if (rootPath) {
+      setRecentLocations(prev => {
+        const unique = Array.from(new Set([rootPath, ...prev])).slice(0, 5);
+        localStorage.setItem('typora-recent-locations', JSON.stringify(unique));
+        return unique;
+      });
+    }
+  }, [rootPath]);
+
+  return (
+    <div className="border-t border-gray-200 dark:border-gray-700 bg-[var(--side-bar-bg-color)]">
+      {/* Action / Sort Header */}
+      <div className="flex items-center justify-between px-3 py-2 text-xs opacity-70">
+        <span>Action</span>
+        <div className="flex gap-2">
+          {/* Mock Sort Icons */}
+          <span className="cursor-pointer hover:opacity-100" title="Sort by Name">Az</span>
+          <span className="cursor-pointer hover:opacity-100" title="Sort by Date">🕒</span>
+        </div>
+      </div>
+
+      {/* Action Menu List */}
+      <div className="px-3 pb-2 text-xs space-y-1">
+        <div className="cursor-pointer hover:text-[var(--active-file-text-color)] opacity-80" onClick={onNewFile}>
+          New File
+        </div>
+        <div className="cursor-pointer hover:text-[var(--active-file-text-color)] opacity-80" onClick={onOpenFolder}>
+          Open Folder...
+        </div>
+      </div>
+
+      {/* Recent Locations */}
+      <div className="px-3 pb-2 text-xs">
+        <div className="opacity-50 mb-1 font-semibold">Recent Locations</div>
+        <div className="space-y-0.5">
+          {recentLocations.map(loc => (
+            <div
+              key={loc}
+              className={`cursor-pointer truncate opacity-80 hover:opacity-100 ${loc === rootPath ? 'font-bold' : ''}`}
+              title={loc}
+              onClick={() => onSwitchRoot(loc)}
+            >
+              {loc.split('/').pop()}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

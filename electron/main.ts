@@ -66,6 +66,39 @@ app.whenReady().then(() => {
     return fs.writeFile(filePath, content, 'utf-8')
   })
 
+  // Search content in files
+  ipcMain.handle('search-files', async (_, query: string, rootPath: string) => {
+    if (!query || !rootPath) return [];
+
+    try {
+      const { exec } = require('child_process');
+      const util = require('util');
+      const execPromise = util.promisify(exec);
+
+      // Using grep for fast search. -r recursive, -i case insensitive, -n line number, -l filename only? No we want snippets.
+      // -I ignore binary
+      // Max 100 results for performance
+      const command = `grep -rIin "${query.replace(/"/g, '\\"')}" "${rootPath}" | head -n 100`;
+
+      const { stdout } = await execPromise(command);
+
+      // Parse grep output: filepath:line:content
+      const results = stdout.split('\n').filter(Boolean).map((line: string) => {
+        const parts = line.split(':');
+        if (parts.length < 3) return null;
+        const file = parts[0];
+        const lineNum = parts[1];
+        const content = parts.slice(2).join(':').trim();
+        return { file, line: parseInt(lineNum), content };
+      }).filter(Boolean);
+
+      return { success: true, results };
+    } catch (err: any) {
+      console.error('Search failed:', err);
+      return { success: false, error: err.message };
+    }
+  });
+
   ipcMain.handle('open-folder', async () => {
     try {
       const { canceled, filePaths } = await dialog.showOpenDialog(win!, {
@@ -91,6 +124,21 @@ app.whenReady().then(() => {
     } catch (e) {
       console.error("Open folder dialog failed:", e);
       return null;
+    }
+  })
+
+  ipcMain.handle('watch-folder', async (_: unknown, folderPath: string) => {
+    try {
+      if (!fileWatcher && win) {
+        fileWatcher = new FileWatcher(win);
+      }
+      if (fileWatcher) {
+        fileWatcher.watch(folderPath);
+      }
+      return { success: true };
+    } catch (e: any) {
+      console.error("Failed to watch folder:", e);
+      return { success: false, error: e.message };
     }
   })
 
@@ -179,6 +227,51 @@ app.whenReady().then(() => {
       return { success: true };
     } catch (error: any) {
       console.error('Save asset failed:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('show-save-dialog', async () => {
+    const { canceled, filePath } = await dialog.showSaveDialog(win!, {
+      filters: [{ name: 'Markdown', extensions: ['md'] }]
+    });
+    if (canceled) return null;
+    return filePath;
+  });
+
+  // Export to PDF using print dialog
+  ipcMain.handle('export-pdf', async () => {
+    const { canceled, filePath } = await dialog.showSaveDialog(win!, {
+      defaultPath: 'document.pdf',
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    });
+    if (canceled || !filePath) return { success: false };
+
+    try {
+      const data = await win!.webContents.printToPDF({
+        printBackground: true,
+        pageSize: 'A4',
+        margins: { top: 1, bottom: 1, left: 1, right: 1 }
+      });
+      await fs.writeFile(filePath, data);
+      return { success: true, path: filePath };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Export to HTML
+  ipcMain.handle('export-html', async (_: unknown, htmlContent: string) => {
+    const { canceled, filePath } = await dialog.showSaveDialog(win!, {
+      defaultPath: 'document.html',
+      filters: [{ name: 'HTML', extensions: ['html'] }]
+    });
+    if (canceled || !filePath) return { success: false };
+
+    try {
+      await fs.writeFile(filePath, htmlContent, 'utf-8');
+      return { success: true, path: filePath };
+    } catch (error: any) {
       return { success: false, error: error.message };
     }
   });

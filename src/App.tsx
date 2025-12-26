@@ -32,6 +32,13 @@ function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Sidebar Width State (resizable)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('typora-sidebar-width');
+    return saved ? parseInt(saved, 10) : 320;
+  });
+  const dragBarRef = useRef<HTMLDivElement>(null);
+
   // Preferences State (load from localStorage)
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [theme, setTheme] = useState<string>(() => {
@@ -59,7 +66,12 @@ function App() {
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
-  const handleFileSelect = async (path: string) => {
+  const handleFileSelect = async (path: string, searchTerm?: string) => {
+    // If searchTerm provided, set it for editor highlighting
+    if (searchTerm) {
+      setSearchQuery(searchTerm);
+    }
+
     // Check if file is already open
     const existingTab = tabs.find(t => t.path === path);
     if (existingTab) {
@@ -118,9 +130,13 @@ function App() {
   }
 
   const startRenaming = () => {
+    console.log("startRenaming called", activeTab);
     if (activeTab.path) {
+      console.log("Setting isRenaming to true");
       setIsRenaming(true);
       setRenameValue(activeTab.path.split('/').pop() || '');
+    } else {
+      console.log("No path for active tab, cannot rename (should trigger save)");
     }
   };
 
@@ -137,7 +153,6 @@ function App() {
           setTabs(prev => prev.map(t => t.id === activeTab.id ? { ...t, path: newPath } : t));
         } catch (error) {
           console.error("Renaming failed", error);
-          // alert("Renaming failed");
         }
       }
     }
@@ -148,6 +163,71 @@ function App() {
     setStats(newStats);
   };
 
+  // Save Logic
+  const saveFile = async () => {
+    const currentTab = tabsRef.current.find(t => t.id === activeTabIdRef.current);
+    if (!currentTab) return;
+
+    let path = currentTab.path;
+
+    // If no path (Untitled), ask where to save
+    if (!path) {
+      const filePath = await window.electron.showSaveDialog();
+      if (!filePath) return; // User canceled
+      path = filePath;
+      // Update tab path immediately so subsequent saves work
+      setTabs(prev => prev.map(t =>
+        t.id === currentTab.id ? { ...t, path: filePath } : t
+      ));
+    }
+
+    if (path) {
+      try {
+        await window.electron.writeFile(path, currentTab.content);
+        // Mark as clean
+        setTabs(prev => prev.map(t =>
+          t.id === currentTab.id ? { ...t, isDirty: false, path: path } : t
+        ));
+      } catch (error) {
+        console.error("Save failed", error);
+      }
+    }
+  };
+
+  // Sidebar Resize Drag Handler (MarkText pattern)
+  useEffect(() => {
+    const dragBar = dragBarRef.current;
+    if (!dragBar) return;
+
+    let startX = 0;
+    let startWidth = sidebarWidth;
+
+    const mouseMoveHandler = (event: MouseEvent) => {
+      const offset = event.clientX - startX;
+      const newWidth = Math.max(220, Math.min(600, startWidth + offset));
+      setSidebarWidth(newWidth);
+    };
+
+    const mouseUpHandler = () => {
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
+      localStorage.setItem('typora-sidebar-width', String(sidebarWidth));
+    };
+
+    const mouseDownHandler = (event: MouseEvent) => {
+      startX = event.clientX;
+      startWidth = sidebarWidth;
+      document.addEventListener('mousemove', mouseMoveHandler);
+      document.addEventListener('mouseup', mouseUpHandler);
+    };
+
+    dragBar.addEventListener('mousedown', mouseDownHandler);
+
+    return () => {
+      dragBar.removeEventListener('mousedown', mouseDownHandler);
+    };
+  }, [sidebarWidth]);
+
   // Handle Menu Actions
   useEffect(() => {
     const removeListener = window.electron.on('menu-action', (_: any, action: string) => {
@@ -155,24 +235,109 @@ function App() {
         setSidebarOpen(prev => !prev);
       }
       if (action === 'find') {
-        setIsSearchOpen(true);
+        setIsSearchOpen(prev => !prev); // Toggle
+        // If opening, focus is handled by SearchBox autoFocus
       }
       if (action === 'open-preferences') {
         setIsPreferencesOpen(true);
       }
       if (action === 'save') {
-        const currentTab = tabsRef.current.find(t => t.id === activeTabIdRef.current);
-        if (currentTab && currentTab.path) {
-          window.electron.writeFile(currentTab.path, currentTab.content).then(() => {
-            // Mark as clean on save
-            setTabs(prev => prev.map(t =>
-              t.id === currentTab.id ? { ...t, isDirty: false } : t
-            ));
-          });
-        }
+        saveFile();
+      }
+      if (action === 'toggle-source-mode') {
+        editorRef.current?.toggleSourceMode();
+      }
+      // Format actions
+      if (action === 'format-bold') {
+        editorRef.current?.toggleBold();
+      }
+      if (action === 'format-italic') {
+        editorRef.current?.toggleItalic();
+      }
+      if (action === 'format-underline') {
+        editorRef.current?.toggleUnderline();
+      }
+      if (action === 'format-strike') {
+        editorRef.current?.toggleStrike();
+      }
+      if (action === 'format-highlight') {
+        editorRef.current?.toggleHighlight();
+      }
+      if (action === 'format-code') {
+        editorRef.current?.toggleCode();
+      }
+      // Paragraph actions
+      if (action === 'heading-1') editorRef.current?.setHeading(1);
+      if (action === 'heading-2') editorRef.current?.setHeading(2);
+      if (action === 'heading-3') editorRef.current?.setHeading(3);
+      if (action === 'heading-4') editorRef.current?.setHeading(4);
+      if (action === 'heading-5') editorRef.current?.setHeading(5);
+      if (action === 'heading-6') editorRef.current?.setHeading(6);
+      if (action === 'paragraph') editorRef.current?.setParagraph();
+      if (action === 'blockquote') editorRef.current?.toggleBlockquote();
+      if (action === 'ordered-list') editorRef.current?.toggleOrderedList();
+      if (action === 'bullet-list') editorRef.current?.toggleBulletList();
+      if (action === 'task-list') editorRef.current?.toggleTaskList();
+      if (action === 'horizontal-rule') editorRef.current?.insertHorizontalRule();
+      if (action === 'code-block') editorRef.current?.toggleCodeBlock();
+      // Export actions
+      if (action === 'export-pdf') {
+        (window.electron as any).exportPdf();
+      }
+      if (action === 'export-html') {
+        // Get HTML from the editor content
+        const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${activeTab.path ? activeTab.path.split('/').pop() : 'Document'}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+    pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
+    blockquote { border-left: 4px solid #ddd; padding-left: 16px; margin-left: 0; color: #666; }
+  </style>
+</head>
+<body>
+${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+</body>
+</html>`;
+        (window.electron as any).exportHtml(htmlContent);
       }
     });
-    return () => removeListener();
+
+    // Global Keyboard Listeners (Backup for reliability)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey;
+      if (isMod && e.key === 's') {
+        e.preventDefault();
+        saveFile();
+      }
+      // Format shortcuts backup
+      if (isMod && e.shiftKey && e.key === 'u') {
+        e.preventDefault();
+        editorRef.current?.toggleSourceMode();
+      }
+      if (isMod && !e.shiftKey && e.key === 'b') {
+        e.preventDefault();
+        editorRef.current?.toggleBold();
+      }
+      if (isMod && !e.shiftKey && e.key === 'i') {
+        e.preventDefault();
+        editorRef.current?.toggleItalic();
+      }
+      if (isMod && !e.shiftKey && e.key === 'u') {
+        e.preventDefault();
+        editorRef.current?.toggleUnderline();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      removeListener();
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   // Handle Theme Selection using CSS variables
@@ -203,18 +368,33 @@ function App() {
     <div className="h-screen w-screen flex flex-col" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
       {/* Title Bar - Draggable */}
       <div
-        className="titlebar h-[38px] w-full fixed top-0 left-0 z-50 flex items-center justify-center pointer-events-none"
+        className="titlebar h-[38px] w-full fixed top-0 left-0 z-50 flex items-center justify-center"
         style={{
           backgroundColor: 'var(--side-bar-bg-color, #fafafa)',
-          borderBottom: 'var(--window-border, 1px solid #e5e5e5)'
-        }}
+          borderBottom: 'var(--window-border, 1px solid #e5e5e5)',
+          WebkitAppRegion: 'drag' // Entire bar is draggable
+        } as any}
       >
-        {/* Filename / Rename Input - Center - Pointer events allowed here */}
-        <div className="pointer-events-auto flex items-center z-50">
+        {/* Filename / Rename Input - Center - No Drag to allow interaction */}
+        <div
+          className="flex items-center z-[100] px-4 py-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+          style={{ WebkitAppRegion: 'no-drag' } as any}
+          onClick={(e) => {
+            e.stopPropagation(); // Stop drag event if any
+            console.log("Title clicked. Path:", activeTab.path);
+            if (activeTab.path) {
+              startRenaming();
+            } else {
+              // If untitled, clicking title triggers Save As
+              saveFile();
+            }
+          }}
+          title={activeTab.path ? "Click to rename" : "Click to save"}
+        >
           {isRenaming ? (
             <input
               autoFocus
-              className="text-sm font-medium text-center bg-white border border-blue-500 rounded px-1 outline-none min-w-[200px]"
+              className="text-sm font-medium text-center bg-white border border-blue-500 rounded px-1 outline-none min-w-[200px] text-gray-900"
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               onBlur={finishRenaming}
@@ -222,39 +402,52 @@ function App() {
                 if (e.key === 'Enter') finishRenaming();
                 if (e.key === 'Escape') setIsRenaming(false);
               }}
+              onClick={(e) => e.stopPropagation()}
             />
           ) : (
             <span
-              onClick={startRenaming}
-              className="text-sm font-medium truncate max-w-[400px] cursor-text hover:bg-gray-100 rounded px-2 py-0.5 transition-colors"
+              className="text-sm font-medium truncate max-w-[400px]"
               style={{ color: 'var(--text-color, #333)' }}
-              title="Click to rename"
             >
               {activeTab.path ? activeTab.path.split('/').pop() : 'Untitled'}
             </span>
           )}
         </div>
-
-        {/* Placeholder for draggable area */}
-        <div className="absolute inset-0" style={{ WebkitAppRegion: 'drag' } as any}></div>
       </div>
 
       {/* Main Content Area - Below Titlebar */}
       <div className="flex-1 flex overflow-hidden relative mt-[38px]">
 
-        {/* Sidebar */}
+        {/* Sidebar with integrated drag bar */}
         <div
-          className="h-full border-r"
+          className="h-full flex-shrink-0 relative"
           style={{
-            display: isSidebarOpen ? 'block' : 'none',
-            borderColor: 'var(--window-border, #ddd)',
-            width: '250px' // Fixed width for sidebar logic
-          } as any}
+            display: isSidebarOpen ? 'flex' : 'none',
+            width: `${sidebarWidth}px`
+          }}
         >
           <Sidebar
             currentPath={activeTab.path}
             onFileSelect={handleFileSelect}
             onClose={() => setSidebarOpen(false)}
+            onRename={(oldPath, newPath) => {
+              setTabs(prev => prev.map(t => {
+                if (t.path === oldPath) return { ...t, path: newPath };
+                // Also handle cleaning up children paths if folder rename? 
+                // For now just file rename.
+                if (t.path?.startsWith(oldPath + '/')) {
+                  return { ...t, path: t.path.replace(oldPath, newPath) };
+                }
+                return t;
+              }));
+            }}
+            onScrollToLine={(line) => editorRef.current?.scrollToLine(line)}
+            activeContent={activeTab.content}
+          />
+          {/* Drag Bar - MarkText style */}
+          <div
+            ref={dragBarRef}
+            className="absolute top-0 right-0 bottom-0 w-[3px] cursor-col-resize hover:border-r-2 hover:border-blue-500"
           />
         </div>
 
@@ -262,6 +455,7 @@ function App() {
         <StatusPill
           themeName={theme}
           wordCount={stats.words}
+          lineCount={activeTab.content.split('\n').length}
           onThemeClick={cycleTheme}
           onSourceClick={() => editorRef.current?.toggleSourceMode()}
         />
@@ -270,7 +464,13 @@ function App() {
         <div className="flex-1 flex flex-col h-full overflow-hidden" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
 
           {/* Tab Bar */}
-          <div className="flex items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-x-auto no-scrollbar h-[35px]">
+          <div
+            className="flex items-center border-b overflow-x-auto no-scrollbar h-[35px]"
+            style={{
+              backgroundColor: 'var(--side-bar-bg-color)',
+              borderColor: 'var(--window-border)'
+            }}
+          >
             {tabs.map(tab => {
               const fileName = tab.path ? tab.path.split('/').pop() : 'Untitled-1';
               const isActive = tab.id === activeTabId;
@@ -313,6 +513,8 @@ function App() {
                 onClose={() => { setIsSearchOpen(false); setSearchQuery(''); }}
                 onNext={() => editorRef.current?.findNext()}
                 onPrev={() => editorRef.current?.findPrev()}
+                onReplace={(replacement) => editorRef.current?.replaceCurrent(replacement)}
+                onReplaceAll={(search, replacement) => editorRef.current?.replaceAll(search, replacement)}
               />
             )}
 

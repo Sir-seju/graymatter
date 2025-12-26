@@ -38,7 +38,11 @@
 - [x] Title bar with file renaming
 - [x] Status pill (word count, theme toggle)
 - [x] Preferences modal (theme, font size)
-- [x] Search box (basic, no next/prev navigation)
+- [x] Search box (Find in File)
+- [x] **Global Search** (Sidebar Tab)
+- [x] **Outline View** (Sidebar Tab)
+- [x] **Sidebar Tabs** (Files, Search, Outline)
+- [x] **Fluid Left-Aligned Layout** (Fixed padding issues)
 
 ### Theming
 - [x] Theme system with CSS variables

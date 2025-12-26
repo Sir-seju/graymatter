@@ -80,6 +80,50 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#7f8c8d',
     '--primary-color': '#3498db',
   },
+  dracula: {
+    '--bg-color': '#282a36',
+    '--text-color': '#f8f8f2',
+    '--side-bar-bg-color': '#21222c',
+    '--window-border': '#44475a',
+    '--active-file-bg-color': '#44475a',
+    '--active-file-text-color': '#f8f8f2',
+    '--item-hover-bg-color': '#383a46',
+    '--control-text-color': '#6272a4',
+    '--primary-color': '#bd93f9',
+  },
+  solarizedDark: {
+    '--bg-color': '#002b36',
+    '--text-color': '#839496',
+    '--side-bar-bg-color': '#073642',
+    '--window-border': '#586e75',
+    '--active-file-bg-color': '#073642',
+    '--active-file-text-color': '#93a1a1',
+    '--item-hover-bg-color': '#094652',
+    '--control-text-color': '#657b83',
+    '--primary-color': '#268bd2',
+  },
+  solarizedLight: {
+    '--bg-color': '#fdf6e3',
+    '--text-color': '#657b83',
+    '--side-bar-bg-color': '#eee8d5',
+    '--window-border': '#93a1a1',
+    '--active-file-bg-color': '#eee8d5',
+    '--active-file-text-color': '#586e75',
+    '--item-hover-bg-color': '#f5efdc',
+    '--control-text-color': '#839496',
+    '--primary-color': '#268bd2',
+  },
+  monokai: {
+    '--bg-color': '#272822',
+    '--text-color': '#f8f8f2',
+    '--side-bar-bg-color': '#1e1f1c',
+    '--window-border': '#3e3d32',
+    '--active-file-bg-color': '#3e3d32',
+    '--active-file-text-color': '#f8f8f2',
+    '--item-hover-bg-color': '#35342a',
+    '--control-text-color': '#75715e',
+    '--primary-color': '#a6e22e',
+  },
 };
 
 export const themeNames = Object.keys(themes);
@@ -102,7 +146,7 @@ export function applyTheme(themeName: string): void {
   root.classList.add(`theme-${themeName}`);
 
   // Toggle dark class for Tailwind
-  const isDark = ['night', 'nord'].includes(themeName);
+  const isDark = ['night', 'nord', 'dracula', 'solarizedDark', 'monokai'].includes(themeName);
   if (isDark) {
     document.documentElement.classList.add('dark');
   } else {

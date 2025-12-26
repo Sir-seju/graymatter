@@ -17,7 +17,6 @@ build/
 *.rpm
 *.snap
 *.asar
-*.zip
 *.tar.gz
 
 # Logs
@@ -49,7 +48,20 @@ Thumbs.db
 .cache/
 *.tsbuildinfo
 
-# Reference/temp files (optional - remove if you want these tracked)
+# Reference/temp files
+marktext_reference/
 *_reference/
 s_screenshots/
+*.mov
+*.mp4
+
+# Archives
 *.zip
+
+# Package lock (optional - some prefer to track this)
+# package-lock.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp

@@ -117,9 +117,9 @@ pre code,
 
 #write,
 .ProseMirror {
-  max-width: 860px;
+  max-width: min(90%, 1400px);
   margin: 0 auto;
-  padding: 30px 60px 100px;
+  padding: 30px 60px 100px 60px;
   min-height: 100vh;
   box-sizing: border-box;
   line-height: 1.6;
@@ -178,6 +178,19 @@ pre code,
 .ProseMirror ol {
   padding-left: 1.5rem;
   margin-bottom: 1rem;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+/* Nested lists - different bullet styles */
+.ProseMirror ul ul {
+  list-style-type: circle;
+}
+
+.ProseMirror ul ul ul {
+  list-style-type: square;
 }
 
 .ProseMirror li {
