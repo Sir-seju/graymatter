@@ -32,12 +32,11 @@ function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Sidebar Width State (resizable)
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem('typora-sidebar-width');
-    return saved ? parseInt(saved, 10) : 320;
-  });
-  const dragBarRef = useRef<HTMLDivElement>(null);
+  // Sidebar Width (fixed)
+  const sidebarWidth = 280;
+
+  // Title bar auto-hide
+  const [isTitleBarVisible, setIsTitleBarVisible] = useState(true);
 
   // Preferences State (load from localStorage)
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
@@ -194,39 +193,20 @@ function App() {
     }
   };
 
-  // Sidebar Resize Drag Handler (MarkText pattern)
+  // Title bar auto-hide on mouse position
   useEffect(() => {
-    const dragBar = dragBarRef.current;
-    if (!dragBar) return;
-
-    let startX = 0;
-    let startWidth = sidebarWidth;
-
-    const mouseMoveHandler = (event: MouseEvent) => {
-      const offset = event.clientX - startX;
-      const newWidth = Math.max(220, Math.min(600, startWidth + offset));
-      setSidebarWidth(newWidth);
+    const handleMouseMove = (e: MouseEvent) => {
+      // Show title bar when mouse is in top 50px
+      if (e.clientY <= 50) {
+        setIsTitleBarVisible(true);
+      } else if (e.clientY > 80) {
+        setIsTitleBarVisible(false);
+      }
     };
 
-    const mouseUpHandler = () => {
-      document.removeEventListener('mousemove', mouseMoveHandler);
-      document.removeEventListener('mouseup', mouseUpHandler);
-      localStorage.setItem('typora-sidebar-width', String(sidebarWidth));
-    };
-
-    const mouseDownHandler = (event: MouseEvent) => {
-      startX = event.clientX;
-      startWidth = sidebarWidth;
-      document.addEventListener('mousemove', mouseMoveHandler);
-      document.addEventListener('mouseup', mouseUpHandler);
-    };
-
-    dragBar.addEventListener('mousedown', mouseDownHandler);
-
-    return () => {
-      dragBar.removeEventListener('mousedown', mouseDownHandler);
-    };
-  }, [sidebarWidth]);
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // Handle Menu Actions
   useEffect(() => {
@@ -366,13 +346,16 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
 
   return (
     <div className="h-screen w-screen flex flex-col" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
-      {/* Title Bar - Draggable */}
+      {/* Title Bar - Auto-hide with smooth transition */}
       <div
-        className="titlebar h-[38px] w-full fixed top-0 left-0 z-50 flex items-center justify-center"
+        className="titlebar w-full fixed top-0 left-0 z-50 flex items-center justify-center transition-all duration-300 ease-in-out"
         style={{
           backgroundColor: 'var(--side-bar-bg-color, #fafafa)',
-          borderBottom: 'var(--window-border, 1px solid #e5e5e5)',
-          WebkitAppRegion: 'drag' // Entire bar is draggable
+          borderBottom: '1px solid var(--window-border, #e5e5e5)',
+          WebkitAppRegion: 'drag',
+          height: isTitleBarVisible ? '38px' : '0px',
+          opacity: isTitleBarVisible ? 1 : 0,
+          overflow: 'hidden'
         } as any}
       >
         {/* Filename / Rename Input - Center - No Drag to allow interaction */}
@@ -415,8 +398,11 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         </div>
       </div>
 
-      {/* Main Content Area - Below Titlebar */}
-      <div className="flex-1 flex overflow-hidden relative mt-[38px]">
+      {/* Main Content Area */}
+      <div
+        className="flex-1 flex overflow-hidden relative transition-all duration-300"
+        style={{ marginTop: isTitleBarVisible ? '38px' : '0px' }}
+      >
 
         {/* Sidebar with integrated drag bar */}
         <div
@@ -443,11 +429,6 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             }}
             onScrollToLine={(line) => editorRef.current?.scrollToLine(line)}
             activeContent={activeTab.content}
-          />
-          {/* Drag Bar - MarkText style */}
-          <div
-            ref={dragBarRef}
-            className="absolute top-0 right-0 bottom-0 w-[3px] cursor-col-resize hover:border-r-2 hover:border-blue-500"
           />
         </div>
 
