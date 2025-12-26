@@ -501,8 +501,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
     >
       {/* Left Icon Column (MarkText-style) */}
       <div
-        className="flex flex-col justify-between w-[45px] pt-10 pb-4"
-        style={{ borderRight: '1px solid var(--window-border)', opacity: 0.8 }}
+        className="flex flex-col justify-between w-[45px] pt-2 pb-4"
+        style={{ borderRight: '1px solid var(--window-border)', opacity: 0.9 }}
       >
         <div className="flex flex-col items-center gap-2">
           <div
