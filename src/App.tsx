@@ -193,20 +193,25 @@ function App() {
     }
   };
 
-  // Title bar auto-hide on mouse position
+  // Tab bar auto-hide on mouse position (only over editor area)
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Show title bar when mouse is in top 50px
-      if (e.clientY <= 50) {
-        setIsTitleBarVisible(true);
-      } else if (e.clientY > 80) {
-        setIsTitleBarVisible(false);
+      // Only auto-hide when mouse is over editor area (X > sidebar width)
+      const isOverEditor = e.clientX > (isSidebarOpen ? sidebarWidth : 0);
+
+      if (isOverEditor) {
+        // Show tab bar when mouse is in top 50px of editor area
+        if (e.clientY <= 50) {
+          setIsTitleBarVisible(true);
+        } else if (e.clientY > 80) {
+          setIsTitleBarVisible(false);
+        }
       }
     };
 
     document.addEventListener('mousemove', handleMouseMove);
     return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [isSidebarOpen, sidebarWidth]);
 
   // Handle Menu Actions
   useEffect(() => {
@@ -432,7 +437,12 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             {/* New Tab Button */}
             <div
               onClick={handleNewTab}
-              className="px-3 py-1.5 text-gray-500 hover:text-gray-800 cursor-pointer"
+              className="px-3 py-1.5 cursor-pointer text-lg hover:opacity-100 opacity-60 transition-opacity"
+              style={{
+                color: 'var(--control-text-color)',
+                WebkitAppRegion: 'no-drag'
+              } as any}
+              title="New Tab"
             >
               +
             </div>

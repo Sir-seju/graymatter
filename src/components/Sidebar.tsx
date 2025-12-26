@@ -495,28 +495,44 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
       className="sidebar flex h-full text-sm"
       style={{
         backgroundColor: 'var(--side-bar-bg-color)',
-        color: 'var(--control-text-color)'
+        color: 'var(--control-text-color)',
+        borderRight: '1px solid var(--window-border)'
       }}
     >
       {/* Left Icon Column (MarkText-style) */}
-      <div className="flex flex-col justify-between w-[45px] border-r border-gray-200 dark:border-gray-700 pt-10 pb-4">
+      <div
+        className="flex flex-col justify-between w-[45px] pt-10 pb-4"
+        style={{ borderRight: '1px solid var(--window-border)', opacity: 0.8 }}
+      >
         <div className="flex flex-col items-center gap-2">
           <div
-            className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 ${activeTab === 'files' ? 'bg-gray-200 dark:bg-gray-700' : 'opacity-60'}`}
+            className="w-10 h-10 flex items-center justify-center rounded cursor-pointer transition-all"
+            style={{
+              backgroundColor: activeTab === 'files' ? 'var(--item-hover-bg-color)' : 'transparent',
+              opacity: activeTab === 'files' ? 1 : 0.6
+            }}
             onClick={() => setActiveTab('files')}
             title="Files"
           >
             <Files size={18} />
           </div>
           <div
-            className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 ${activeTab === 'search' ? 'bg-gray-200 dark:bg-gray-700' : 'opacity-60'}`}
+            className="w-10 h-10 flex items-center justify-center rounded cursor-pointer transition-all"
+            style={{
+              backgroundColor: activeTab === 'search' ? 'var(--item-hover-bg-color)' : 'transparent',
+              opacity: activeTab === 'search' ? 1 : 0.6
+            }}
             onClick={() => setActiveTab('search')}
             title="Search"
           >
             <Search size={18} />
           </div>
           <div
-            className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 ${activeTab === 'outline' ? 'bg-gray-200 dark:bg-gray-700' : 'opacity-60'}`}
+            className="w-10 h-10 flex items-center justify-center rounded cursor-pointer transition-all"
+            style={{
+              backgroundColor: activeTab === 'outline' ? 'var(--item-hover-bg-color)' : 'transparent',
+              opacity: activeTab === 'outline' ? 1 : 0.6
+            }}
             onClick={() => setActiveTab('outline')}
             title="Outline"
           >
@@ -530,7 +546,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
 
         {/* FILES TAB */}
         <div className={`flex-col h-full ${activeTab === 'files' ? 'flex' : 'hidden'}`}>
-          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid var(--window-border)', opacity: 0.9 }}>
             <span className="font-semibold text-xs tracking-wider uppercase opacity-70">
               {rootPath ? rootPath.split('/').pop() : 'NO FOLDER'}
             </span>
