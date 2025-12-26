@@ -346,63 +346,8 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
 
   return (
     <div className="h-screen w-screen flex flex-col" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
-      {/* Title Bar - Auto-hide with smooth transition */}
-      <div
-        className="titlebar w-full fixed top-0 left-0 z-50 flex items-center justify-center transition-all duration-300 ease-in-out"
-        style={{
-          backgroundColor: 'var(--side-bar-bg-color, #fafafa)',
-          borderBottom: '1px solid var(--window-border, #e5e5e5)',
-          WebkitAppRegion: 'drag',
-          height: isTitleBarVisible ? '38px' : '0px',
-          opacity: isTitleBarVisible ? 1 : 0,
-          overflow: 'hidden'
-        } as any}
-      >
-        {/* Filename / Rename Input - Center - No Drag to allow interaction */}
-        <div
-          className="flex items-center z-[100] px-4 py-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-          style={{ WebkitAppRegion: 'no-drag' } as any}
-          onClick={(e) => {
-            e.stopPropagation(); // Stop drag event if any
-            console.log("Title clicked. Path:", activeTab.path);
-            if (activeTab.path) {
-              startRenaming();
-            } else {
-              // If untitled, clicking title triggers Save As
-              saveFile();
-            }
-          }}
-          title={activeTab.path ? "Click to rename" : "Click to save"}
-        >
-          {isRenaming ? (
-            <input
-              autoFocus
-              className="text-sm font-medium text-center bg-white border border-blue-500 rounded px-1 outline-none min-w-[200px] text-gray-900"
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-              onBlur={finishRenaming}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') finishRenaming();
-                if (e.key === 'Escape') setIsRenaming(false);
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
-            <span
-              className="text-sm font-medium truncate max-w-[400px]"
-              style={{ color: 'var(--text-color, #333)' }}
-            >
-              {activeTab.path ? activeTab.path.split('/').pop() : 'Untitled'}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div
-        className="flex-1 flex overflow-hidden relative transition-all duration-300"
-        style={{ marginTop: isTitleBarVisible ? '38px' : '0px' }}
-      >
+      {/* Main Content Area - Full Screen */}
+      <div className="flex-1 flex overflow-hidden relative">
 
         {/* Sidebar with integrated drag bar */}
         <div
@@ -444,13 +389,17 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         {/* Editor Area with Tabs */}
         <div className="flex-1 flex flex-col h-full overflow-hidden" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
 
-          {/* Tab Bar */}
+          {/* Tab Bar - Auto-hide with draggable area */}
           <div
-            className="flex items-center border-b overflow-x-auto no-scrollbar h-[35px]"
+            className="flex items-center overflow-x-auto no-scrollbar transition-all duration-300 ease-in-out"
             style={{
               backgroundColor: 'var(--side-bar-bg-color)',
-              borderColor: 'var(--window-border)'
-            }}
+              borderBottom: '1px solid var(--window-border)',
+              height: isTitleBarVisible ? '35px' : '0px',
+              opacity: isTitleBarVisible ? 1 : 0,
+              overflow: 'hidden',
+              WebkitAppRegion: 'drag'
+            } as any}
           >
             {tabs.map(tab => {
               const fileName = tab.path ? tab.path.split('/').pop() : 'Untitled-1';
@@ -459,16 +408,21 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                 <div
                   key={tab.id}
                   onClick={() => setActiveTabId(tab.id)}
-                  className={`
-                     group flex items-center px-4 py-1.5 min-w-[120px] max-w-[200px] border-r border-gray-200 dark:border-gray-700 cursor-pointer text-sm select-none
-                     ${isActive ? 'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border-t-2 border-t-blue-500' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}
-                   `}
+                  className="group flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
+                  style={{
+                    WebkitAppRegion: 'no-drag',
+                    backgroundColor: isActive ? 'var(--bg-color)' : 'transparent',
+                    color: isActive ? 'var(--text-color)' : 'var(--control-text-color)',
+                    borderRight: '1px solid var(--window-border)',
+                    borderTop: isActive ? '2px solid var(--primary-color)' : '2px solid transparent'
+                  } as any}
                 >
-                  <span className="truncate flex-1">{fileName}</span>
-                  {tab.isDirty && <span className="w-2 h-2 rounded-full bg-blue-500 ml-2 group-hover:hidden"></span>}
+                  <span className="whitespace-nowrap">{fileName}</span>
+                  {tab.isDirty && <span className="w-2 h-2 rounded-full ml-2 group-hover:hidden" style={{ backgroundColor: 'var(--primary-color)' }}></span>}
                   <span
                     onClick={(e) => handleCloseTab(e, tab.id)}
-                    className={`ml-2 opacity-0 group-hover:opacity-100 hover:bg-gray-300 dark:hover:bg-gray-600 rounded p-0.5 text-gray-500 ${tab.isDirty ? 'hidden group-hover:block' : ''}`}
+                    className={`ml-2 opacity-0 group-hover:opacity-100 rounded p-0.5 hover:bg-black/10 dark:hover:bg-white/10 ${tab.isDirty ? 'hidden group-hover:block' : ''}`}
+                    style={{ color: 'var(--control-text-color)' }}
                   >
                     ✕
                   </span>
