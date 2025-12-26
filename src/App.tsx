@@ -35,8 +35,8 @@ function App() {
   // Sidebar Width (fixed)
   const sidebarWidth = 280;
 
-  // Title bar auto-hide
-  const [isTitleBarVisible, setIsTitleBarVisible] = useState(true);
+  // Tab bar auto-hide (start hidden for clean look)
+  const [isTitleBarVisible, setIsTitleBarVisible] = useState(false);
 
   // Preferences State (load from localStorage)
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);

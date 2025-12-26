@@ -551,8 +551,23 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
               {rootPath ? rootPath.split('/').pop() : 'NO FOLDER'}
             </span>
             <div className="flex items-center gap-1">
-              <button onClick={handleOpenFolder} className="p-1 rounded opacity-60 hover:opacity-100"><FolderOpen size={14} /></button>
-              <button onClick={() => rootPath && handleNewFile(rootPath)} className="p-1 rounded opacity-60 hover:opacity-100" disabled={!rootPath}><FilePlus size={14} /></button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleOpenFolder(); }}
+                className="p-1 rounded opacity-60 hover:opacity-100 cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
+                title="Open Folder"
+              >
+                <FolderOpen size={14} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); if (rootPath) handleNewFile(rootPath); }}
+                className="p-1 rounded opacity-60 hover:opacity-100 cursor-pointer disabled:opacity-30"
+                style={{ pointerEvents: 'auto' }}
+                disabled={!rootPath}
+                title="New File"
+              >
+                <FilePlus size={14} />
+              </button>
             </div>
           </div>
 
