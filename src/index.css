@@ -400,12 +400,11 @@ pre code,
   font-style: normal;
 }
 
-/* Night Theme - Code Blocks */
+/* Night Theme - Code Blocks (Background handled by variable) */
 .theme-night .ProseMirror pre,
 .theme-night .code-block-wrapper {
-  background-color: var(--code-bg-color);
+  /* Background handled by var(--code-block-bg) */
   border: none;
-  border-radius: 0;
 }
 
 .theme-night .ProseMirror pre code {
@@ -629,18 +628,12 @@ pre code,
    CODE BLOCK WRAPPER - Improved Styling
    ============================================ */
 
+/* Code Block Wrapper styling handles by Component */
 .code-block-wrapper {
   position: relative;
   margin: 1rem 0;
   border-radius: 6px;
   overflow: hidden;
-}
-
-.code-block-wrapper pre {
-  margin: 0 !important;
-  padding: 1rem !important;
-  padding-top: 2.5rem !important;
-  /* Space for copy button */
 }
 
 /* Ensure code block content is editable and styled correctly */
