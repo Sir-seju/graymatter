@@ -492,7 +492,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
 
   return (
     <div
-      className="sidebar flex h-full text-sm"
+      className="sidebar flex h-full text-[13px]"
       style={{
         backgroundColor: 'var(--side-bar-bg-color)',
         color: 'var(--control-text-color)',

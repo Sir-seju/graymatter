@@ -55,18 +55,26 @@ body {
   color: var(--text-color);
 }
 
-/* Code blocks */
+/* Code blocks - polished styling */
 pre.hljs,
 pre code,
-.code-block {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+.code-block,
+.ProseMirror pre {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  overflow-x: auto;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .dark pre.hljs,
 .dark pre code,
-.dark .code-block {
-  background-color: rgba(255, 255, 255, 0.08);
+.dark .code-block,
+.dark .ProseMirror pre {
+  background-color: rgba(0, 0, 0, 0.35);
 }
 
 /* Scrollbar styling */
@@ -118,12 +126,13 @@ pre code,
 
 #write,
 .ProseMirror {
-  max-width: min(90%, 1400px);
+  max-width: min(75%, 900px);
   margin: 0 auto;
-  padding: 30px 60px 100px 60px;
+  padding: 40px 80px 100px 80px;
   min-height: 100vh;
   box-sizing: border-box;
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 17px;
 }
 
 /* Headings */
@@ -416,45 +425,62 @@ pre code,
   padding: 2px 5px;
 }
 
-/* Night Theme - Syntax Highlighting Colors */
-.theme-night .hljs-keyword {
-  color: #C88FD0;
+/* Night Theme - Syntax Highlighting Colors - Vibrant */
+.theme-night .hljs-keyword,
+.theme-night .hljs-selector-tag {
+  color: #ff79c6;
+  font-weight: 500;
 }
 
 .theme-night .hljs-tag {
-  color: #7DF46A;
+  color: #50fa7b;
 }
 
-.theme-night .hljs-attr {
-  color: #7575E4;
+.theme-night .hljs-attr,
+.theme-night .hljs-attribute {
+  color: #8be9fd;
 }
 
-.theme-night .hljs-string {
-  color: #D26B6B;
+.theme-night .hljs-string,
+.theme-night .hljs-doctag {
+  color: #f1fa8c;
 }
 
 .theme-night .hljs-comment {
-  color: #DA924A;
+  color: #6272a4;
+  font-style: italic;
 }
 
-.theme-night .hljs-title {
-  color: #8d8df0;
+.theme-night .hljs-title,
+.theme-night .hljs-function .hljs-title {
+  color: #bd93f9;
 }
 
 .theme-night .hljs-number {
-  color: #64AB8F;
+  color: #50fa7b;
 }
 
-.theme-night .hljs-variable {
-  color: #9FBAD5;
+.theme-night .hljs-variable,
+.theme-night .hljs-template-variable {
+  color: #ffb86c;
 }
 
-.theme-night .hljs-built_in {
-  color: #f3b3f8;
+.theme-night .hljs-built_in,
+.theme-night .hljs-type {
+  color: #8be9fd;
 }
 
-.theme-night .hljs-literal {
-  color: #84B6CB;
+.theme-night .hljs-literal,
+.theme-night .hljs-boolean {
+  color: #bd93f9;
+}
+
+.theme-night .hljs-params {
+  color: #ffb86c;
+}
+
+.theme-night .hljs-symbol {
+  color: #ff79c6;
 }
 
 /* Night Theme - Tables */
