@@ -14,7 +14,10 @@ export default ({ node, updateAttributes }: any) => {
   };
 
   return (
-    <NodeViewWrapper className="code-block-wrapper relative group my-6 rounded-lg overflow-hidden border border-gray-200 dark:border-none bg-gray-50 dark:bg-[#282a36]">
+    <NodeViewWrapper
+      className="code-block-wrapper relative group my-6 rounded-lg overflow-hidden border border-gray-200 dark:border-none"
+      style={{ backgroundColor: 'var(--code-block-bg)' }}
+    >
       {/* Language Selector - Top Left */}
       <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
         <LanguageSelector

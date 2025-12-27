@@ -411,7 +411,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                   <div
                     key={tab.id}
                     onClick={() => setActiveTabId(tab.id)}
-                    className="group flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
+                    className="group flex-shrink-0 flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
                     style={{
                       WebkitAppRegion: 'no-drag',
                       backgroundColor: isActive ? 'var(--bg-color)' : 'transparent',
