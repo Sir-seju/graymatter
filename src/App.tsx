@@ -41,7 +41,7 @@ function App() {
   // Preferences State (load from localStorage)
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [theme, setTheme] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEYS.theme) || 'system';
+    return localStorage.getItem(STORAGE_KEYS.theme) || 'night';
   });
   const [fontSize, setFontSize] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.fontSize);

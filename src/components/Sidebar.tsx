@@ -546,7 +546,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
 
         {/* FILES TAB */}
         <div className={`flex-col h-full ${activeTab === 'files' ? 'flex' : 'hidden'}`}>
-          <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid var(--window-border)', opacity: 0.9 }}>
+          <div className="flex items-center justify-between px-3 h-[35px]" style={{ borderBottom: '1px solid var(--window-border)' }}>
             <span className="font-semibold text-xs tracking-wider uppercase opacity-70">
               {rootPath ? rootPath.split('/').pop() : 'NO FOLDER'}
             </span>
@@ -696,7 +696,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
 
         {/* OUTLINE TAB */}
         <div className={`flex-col h-full overflow-y-auto ${activeTab === 'outline' ? 'flex' : 'hidden'}`}>
-          <div className="px-3 py-2 text-xs font-semibold opacity-50 uppercase tracking-wider">Outline</div>
+          <div className="px-3 h-[35px] flex items-center text-xs font-semibold opacity-50 uppercase tracking-wider" style={{ borderBottom: '1px solid var(--window-border)' }}>Outline</div>
           {outline.length === 0 ? (
             <div className="p-4 text-center opacity-40 text-xs">No headers found</div>
           ) : (
