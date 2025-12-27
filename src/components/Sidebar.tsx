@@ -446,7 +446,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
-              <span className="truncate text-xs">{node.name}</span>
+              <span className="truncate text-xs flex-1 min-w-0">{node.name}</span>
             )}
           </div>
           {node.isOpen && node.children && (
@@ -472,7 +472,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
         onClick={() => onFileSelect(node.path)}
         onContextMenu={(e) => handleContextMenu(e, node)}
       >
-        <File size={14} className="mr-2 opacity-50" />
+        <File size={14} className="mr-2 opacity-50 flex-shrink-0" />
         {isRenaming ? (
           <input
             autoFocus
@@ -484,7 +484,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onFileSelect, onClose, o
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="truncate text-xs">{node.name}</span>
+          <span className="truncate text-xs flex-1 min-w-0">{node.name}</span>
         )}
       </div>
     );
