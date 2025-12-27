@@ -419,62 +419,88 @@ pre code,
   padding: 2px 5px;
 }
 
-/* Night Theme - Syntax Highlighting Colors - Vibrant */
+/* Night Theme - Syntax Highlighting Colors - Vibrant Dracula */
 .theme-night .hljs-keyword,
-.theme-night .hljs-selector-tag {
+.theme-night .hljs-selector-tag,
+.theme-dracula .hljs-keyword,
+.theme-dracula .hljs-selector-tag {
   color: #ff79c6;
+  /* Pink */
   font-weight: 500;
 }
 
-.theme-night .hljs-tag {
-  color: #50fa7b;
+.theme-night .hljs-tag,
+.theme-dracula .hljs-tag {
+  color: #8be9fd;
+  /* Cyan */
 }
 
 .theme-night .hljs-attr,
-.theme-night .hljs-attribute {
-  color: #8be9fd;
+.theme-night .hljs-attribute,
+.theme-dracula .hljs-attr {
+  color: #50fa7b;
+  /* Green */
 }
 
 .theme-night .hljs-string,
-.theme-night .hljs-doctag {
+.theme-night .hljs-doctag,
+.theme-dracula .hljs-string {
   color: #f1fa8c;
+  /* Yellow */
 }
 
-.theme-night .hljs-comment {
+.theme-night .hljs-comment,
+.theme-dracula .hljs-comment {
   color: #6272a4;
+  /* Gray Blue */
   font-style: italic;
 }
 
 .theme-night .hljs-title,
-.theme-night .hljs-function .hljs-title {
-  color: #bd93f9;
+.theme-night .hljs-function .hljs-title,
+.theme-dracula .hljs-title {
+  color: #50fa7b;
+  /* Green for functions/titles */
 }
 
-.theme-night .hljs-number {
-  color: #50fa7b;
+.theme-night .hljs-number,
+.theme-dracula .hljs-number {
+  color: #bd93f9;
+  /* Purple */
 }
 
 .theme-night .hljs-variable,
-.theme-night .hljs-template-variable {
-  color: #ffb86c;
+.theme-night .hljs-template-variable,
+.theme-dracula .hljs-variable {
+  color: #f8f8f2;
+  /* White/FG */
 }
 
 .theme-night .hljs-built_in,
-.theme-night .hljs-type {
+.theme-night .hljs-type,
+.theme-dracula .hljs-built_in {
   color: #8be9fd;
+  /* Cyan */
+  font-style: italic;
 }
 
 .theme-night .hljs-literal,
-.theme-night .hljs-boolean {
+.theme-night .hljs-boolean,
+.theme-dracula .hljs-literal {
   color: #bd93f9;
+  /* Purple */
 }
 
-.theme-night .hljs-params {
+.theme-night .hljs-params,
+.theme-dracula .hljs-params {
   color: #ffb86c;
+  /* Orange */
 }
 
-.theme-night .hljs-symbol {
+.theme-night .hljs-symbol,
+.theme-dracula .hljs-symbol {
   color: #ff79c6;
+  /* Pink */
 }
 
 /* Night Theme - Tables */

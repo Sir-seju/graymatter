@@ -28,8 +28,7 @@ const StatusPill: React.FC<StatusPillProps> = ({
     >
       <button
         onClick={(e) => { e.stopPropagation(); onThemeClick(); }}
-        className="px-2 py-0.5 rounded hover:opacity-100 opacity-70 transition-opacity uppercase tracking-wide cursor-pointer"
-        style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
+        className="px-2 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors uppercase tracking-wide cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
         title="Click to change theme"
       >
         {themeName}
@@ -37,8 +36,7 @@ const StatusPill: React.FC<StatusPillProps> = ({
       <span style={{ color: 'var(--window-border)' }}>|</span>
       <button
         onClick={(e) => { e.stopPropagation(); onSourceClick(); }}
-        className="px-2 py-0.5 rounded hover:opacity-100 opacity-70 transition-opacity cursor-pointer"
-        style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
+        className="px-2 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-[10px]"
         title="Toggle source mode"
       >
         ⌘⇧U

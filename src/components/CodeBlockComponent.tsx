@@ -32,7 +32,7 @@ export default ({ node, updateAttributes }: any) => {
         {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
       </button>
 
-      <pre spellCheck={false} className="m-0 p-4 pt-10 font-mono text-sm overflow-x-auto bg-transparent">
+      <pre spellCheck={false} className="m-0 p-4 transition-[padding] duration-200 group-hover:pt-10 font-mono text-sm overflow-x-auto bg-transparent">
         <NodeViewContent {...({ as: 'code', spellCheck: false } as any)} />
       </pre>
     </NodeViewWrapper>
