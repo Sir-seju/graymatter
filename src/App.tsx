@@ -397,7 +397,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
           {/* Tab Bar - Auto-hide with draggable area */}
           {isTitleBarVisible && (
             <div
-              className="flex items-center overflow-x-auto no-scrollbar h-[35px]"
+              className="flex items-center overflow-x-auto no-scrollbar h-[35px] pl-2"
               style={{
                 backgroundColor: 'var(--side-bar-bg-color)',
                 borderBottom: '1px solid var(--window-border)',
@@ -411,7 +411,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                   <div
                     key={tab.id}
                     onClick={() => setActiveTabId(tab.id)}
-                    className="group flex-shrink-0 flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
+                    className="group flex-shrink-0 min-w-[120px] flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
                     style={{
                       WebkitAppRegion: 'no-drag',
                       backgroundColor: isActive ? 'var(--bg-color)' : 'transparent',

@@ -135,6 +135,18 @@ export const themes: Record<string, ThemeVariables> = {
     '--primary-color': '#a6e22e',
     '--code-block-bg': '#1e1f1c',
   },
+  everforest: {
+    '--bg-color': '#2e353a',
+    '--text-color': '#d3c6aa',
+    '--side-bar-bg-color': '#363f44',
+    '--window-border': '#444c50',
+    '--active-file-bg-color': '#495156',
+    '--active-file-text-color': '#d3c6aa',
+    '--item-hover-bg-color': '#3f484d',
+    '--control-text-color': '#9da9a0',
+    '--primary-color': '#a7c080',
+    '--code-block-bg': '#363f44',
+  },
 };
 
 export const themeNames = Object.keys(themes);

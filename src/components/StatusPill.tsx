@@ -36,7 +36,7 @@ const StatusPill: React.FC<StatusPillProps> = ({
       <span style={{ color: 'var(--window-border)' }}>|</span>
       <button
         onClick={(e) => { e.stopPropagation(); onSourceClick(); }}
-        className="px-2 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-[10px]"
+        className="px-2 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-mono text-xs font-bold"
         title="Toggle source mode"
       >
         ⌘⇧U
