@@ -16,5 +16,10 @@ interface Window {
     watchFolder: (path: string) => Promise<{ success: boolean; error?: string }>;
     searchFiles: (query: string, rootPath: string) => Promise<{ success: boolean; results?: Array<{ file: string; line: number; content: string }> }>;
     showSaveDialog: () => Promise<string | null>;
+    openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
+    showInFolder: (path: string) => Promise<{ success: boolean; error?: string }>;
+    exportPdf: () => Promise<{ success: boolean; path?: string; error?: string }>;
+    exportHtml: (html: string) => Promise<{ success: boolean; path?: string; error?: string }>;
+    invoke: (channel: string, ...args: any[]) => Promise<any>;
   }
 }

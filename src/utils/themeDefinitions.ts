@@ -12,6 +12,7 @@ export interface ThemeVariables {
   '--control-text-color': string;
   '--primary-color': string;
   '--code-block-bg': string;
+  '--blockquote-border-color'?: string;
 }
 
 export const themes: Record<string, ThemeVariables> = {
@@ -26,18 +27,20 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#666666',
     '--primary-color': '#4a89dc',
     '--code-block-bg': '#f5f5f5',
+    '--blockquote-border-color': '#dfe2e5',
   },
   night: {
     '--bg-color': '#363B40',
-    '--text-color': '#b8bfc6',
+    '--text-color': '#f3f4f5',
     '--side-bar-bg-color': '#2E3033',
     '--window-border': '#555555',
     '--active-file-bg-color': '#222222',
     '--active-file-text-color': '#ffffff',
-    '--item-hover-bg-color': '#70717d',
+    '--item-hover-bg-color': '#484e55',
     '--control-text-color': '#b7b7b7',
     '--primary-color': '#6dc1e7',
     '--code-block-bg': '#282a36',
+    '--blockquote-border-color': '#abf374', // Lime Green from screenshot
   },
   github: {
     '--bg-color': '#ffffff',
@@ -50,6 +53,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#586069',
     '--primary-color': '#0366d6',
     '--code-block-bg': '#f6f8fa',
+    '--blockquote-border-color': '#dfe2e5',
   },
   nord: {
     '--bg-color': '#2E3440',
@@ -62,6 +66,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#D8DEE9',
     '--primary-color': '#88C0D0',
     '--code-block-bg': '#3B4252',
+    '--blockquote-border-color': '#81A1C1',
   },
   pixyll: {
     '--bg-color': '#ffffff',
@@ -74,6 +79,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#666666',
     '--primary-color': '#6a9fb5',
     '--code-block-bg': '#f4f4f4',
+    '--blockquote-border-color': '#eeeeee',
   },
   whitey: {
     '--bg-color': '#ffffff',
@@ -86,6 +92,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#7f8c8d',
     '--primary-color': '#3498db',
     '--code-block-bg': '#f8f8f8',
+    '--blockquote-border-color': '#111',
   },
   dracula: {
     '--bg-color': '#282a36',
@@ -98,6 +105,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#6272a4',
     '--primary-color': '#bd93f9',
     '--code-block-bg': '#1e1f29', // Slightly darker than editor bg for contrast
+    '--blockquote-border-color': '#bd93f9',
   },
   solarizedDark: {
     '--bg-color': '#002b36',
@@ -110,6 +118,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#657b83',
     '--primary-color': '#268bd2',
     '--code-block-bg': '#073642',
+    '--blockquote-border-color': '#268bd2',
   },
   solarizedLight: {
     '--bg-color': '#fdf6e3',
@@ -122,6 +131,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#839496',
     '--primary-color': '#268bd2',
     '--code-block-bg': '#eee8d5',
+    '--blockquote-border-color': '#268bd2',
   },
   monokai: {
     '--bg-color': '#272822',
@@ -134,6 +144,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#75715e',
     '--primary-color': '#a6e22e',
     '--code-block-bg': '#1e1f1c',
+    '--blockquote-border-color': '#a6e22e',
   },
   everforest: {
     '--bg-color': '#2e353a',
@@ -146,6 +157,7 @@ export const themes: Record<string, ThemeVariables> = {
     '--control-text-color': '#9da9a0',
     '--primary-color': '#a7c080',
     '--code-block-bg': '#363f44',
+    '--blockquote-border-color': '#a7c080',
   },
 };
 

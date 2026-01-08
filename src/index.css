@@ -108,10 +108,113 @@ pre code,
   scrollbar-width: none;
 }
 
-/* Source Mode Textarea */
-.source-mode-textarea {
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  line-height: 1.5;
+/* Source Mode Container */
+.source-mode-container {
+  font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+.source-mode-container textarea {
+  font-family: inherit;
+  tab-size: 2;
+}
+
+.source-mode-container textarea::placeholder {
+  color: var(--control-text-color);
+  opacity: 0.4;
+}
+
+.source-mode-container textarea::selection {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* Source Mode Line Numbers - Typora style */
+.source-mode-line-numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Source Mode Syntax Highlighting */
+.source-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.source-syntax {
+  color: var(--control-text-color);
+  opacity: 0.5;
+}
+
+.source-bold {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.source-bold .source-syntax {
+  font-weight: 400;
+}
+
+.source-code {
+  font-family: inherit;
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+.source-blockquote {
+  color: var(--primary-color);
+}
+
+/* Theme-specific source mode colors */
+.theme-everforest .source-bold {
+  color: #a7c080;
+}
+
+.theme-everforest .source-syntax {
+  color: #9da9a0;
+  opacity: 0.6;
+}
+
+.theme-everforest .source-blockquote {
+  color: #83c092;
+}
+
+.theme-dracula .source-bold {
+  color: #ff79c6;
+}
+
+.theme-dracula .source-blockquote {
+  color: #bd93f9;
+}
+
+.theme-night .source-bold {
+  color: #ffffff;
+}
+
+.theme-nord .source-bold {
+  color: #88C0D0;
+}
+
+/* Source Mode Scrollbar sync */
+.source-mode-container .source-mode-line-numbers,
+.source-mode-container textarea {
+  scrollbar-width: none;
+}
+
+.source-mode-container textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.source-mode-container textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.source-mode-container textarea::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+}
+
+.source-mode-container textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
 }
 
 /* ============================================
@@ -120,13 +223,69 @@ pre code,
 
 #write,
 .ProseMirror {
-  max-width: min(75%, 900px);
+  max-width: 900px;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 80px 100px 80px;
+  padding: 40px 60px 100px 60px;
   min-height: 100vh;
   box-sizing: border-box;
   line-height: 1.7;
   font-size: 17px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Smooth caret */
+.ProseMirror {
+  caret-color: var(--primary-color);
+}
+
+/* Selection styling */
+.ProseMirror ::selection {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* Focus state - no visible outline, just clean editing */
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Gapcursor styling for better empty block handling */
+.ProseMirror .ProseMirror-gapcursor {
+  display: none;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ProseMirror .ProseMirror-gapcursor:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid var(--text-color);
+  animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
+}
+
+/* Responsive Resizing */
+@media (max-width: 800px) {
+
+  #write,
+  .ProseMirror {
+    padding: 30px 30px 80px 30px;
+    font-size: 16px;
+  }
 }
 
 /* Headings */
@@ -139,6 +298,11 @@ pre code,
   border-bottom: 1px solid var(--window-border);
   line-height: 1.3;
 }
+
+/* ... (unchanged chunks omitted for brevity if I could, but I must match exact target) ... */
+/* Wait, I can't omit chunks in replace_file_content. sticking to the target strictly */
+/* Actually, I will just replace the specific sections. Using multi_replace might be safer but the target is contiguous-ish. */
+/* I will stick to the exact target block provided. */
 
 .ProseMirror h2 {
   font-size: 1.75rem;
@@ -158,9 +322,10 @@ pre code,
 
 .ProseMirror h4 {
   font-size: 1.15rem;
-  font-weight: 600;
-  margin-top: 1rem;
+  font-weight: 500;
+  margin-top: 1.2rem;
   margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
 }
 
 .ProseMirror h5,
@@ -217,11 +382,12 @@ pre code,
 
 /* Blockquotes */
 .ProseMirror blockquote {
-  border-left: 4px solid var(--primary-color);
+  border-left: 4px solid var(--window-border);
   padding-left: 1rem;
   margin: 1rem 0;
   color: var(--control-text-color);
-  font-style: italic;
+  font-style: normal;
+  /* Cleaner, no italics */
 }
 
 /* Code Blocks */
@@ -261,6 +427,31 @@ pre code,
 .ProseMirror a {
   color: var(--primary-color);
   text-decoration: underline;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.ProseMirror a:hover {
+  opacity: 0.8;
+}
+
+/* Placeholder styling */
+.ProseMirror.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--control-text-color);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--control-text-color);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
 }
 
 /* Horizontal Rule */
@@ -375,29 +566,34 @@ pre code,
 }
 
 /* Night Theme - Strong/Bold */
-.theme-night .ProseMirror strong {
-  color: var(--heading-color);
+/* Night Theme - Strong/Bold */
+html.theme-night .ProseMirror strong {
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
 /* Night Theme - Links */
-.theme-night .ProseMirror a {
+html.theme-night .ProseMirror a {
   color: #e0e0e0;
   text-decoration: underline;
   transition: color 0.2s ease-in-out;
 }
 
-.theme-night .ProseMirror a:hover {
+html.theme-night .ProseMirror a:hover {
   color: #ffffff;
 }
 
 /* Night Theme - Blockquotes */
-.theme-night .ProseMirror blockquote {
-  border-left: 2px solid var(--blockquote-border-color);
-  padding-left: 30px;
-  margin-left: 1.875rem;
-  margin-top: 35px;
-  color: #9DA2A6;
-  font-style: normal;
+html.theme-night .ProseMirror blockquote {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  /* Increased opacity for visibility */
+  border-left: 4px solid var(--blockquote-border-color) !important;
+  padding: 1rem 1rem 1rem 1.5rem !important;
+  margin: 1.5rem 0 !important;
+  color: #c0c5cc !important;
+  /* Brighter quote text */
+  font-style: normal !important;
+  border-radius: 4px;
 }
 
 /* Night Theme - Code Blocks (Background handled by variable) */
@@ -641,4 +837,487 @@ pre code,
   display: block;
   white-space: pre;
   overflow-x: auto;
+}
+
+/* ============================================
+   EVERFOREST THEME - Forest-inspired Dark Theme
+   Based on original Typora Everforest theme
+   ============================================ */
+
+.theme-everforest {
+  /* Everforest color palette */
+  --ef-fg: #d3c6aa;
+  --ef-fg-muted: #9da9a0;
+  --ef-gray-0: #7a8478;
+  --ef-gray-1: #859289;
+  --ef-gray-2: #9da9a0;
+
+  /* Backgrounds */
+  --ef-bg-dim: #22282b;
+  --ef-bg-0: #2e353a;
+  --ef-bg-1: #363f44;
+  --ef-bg-2: #3f484d;
+  --ef-bg-3: #495156;
+  --ef-bg-4: #52595f;
+  --ef-bg-5: #5a6268;
+
+  /* Accent colors */
+  --ef-red: #e67e80;
+  --ef-orange: #e69875;
+  --ef-yellow: #dbbc7f;
+  --ef-green: #a7c080;
+  --ef-aqua: #83c092;
+  --ef-blue: #7fbbb3;
+  --ef-purple: #d699b6;
+
+  /* Theme variables */
+  --bg-color: #2e353a;
+  --text-color: #d3c6aa;
+  --side-bar-bg-color: #363f44;
+  --window-border: #444c50;
+  --active-file-bg-color: #495156;
+  --active-file-text-color: #d3c6aa;
+  --item-hover-bg-color: #3f484d;
+  --control-text-color: #9da9a0;
+  --primary-color: #a7c080;
+  --code-block-bg: #363f44;
+  --blockquote-border-color: #83c092;
+  --heading-color: #d3c6aa;
+}
+
+.theme-everforest,
+.theme-everforest body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Everforest - Headings */
+.theme-everforest .ProseMirror h1,
+.theme-everforest .ProseMirror h2,
+.theme-everforest .ProseMirror h3,
+.theme-everforest .ProseMirror h4,
+.theme-everforest .ProseMirror h5,
+.theme-everforest .ProseMirror h6 {
+  color: var(--heading-color);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.theme-everforest .ProseMirror h1 {
+  font-size: 2.1rem;
+}
+
+.theme-everforest .ProseMirror h2 {
+  font-size: 1.8rem;
+  border-bottom: 1px solid var(--window-border);
+  padding-bottom: 0.35rem;
+}
+
+.theme-everforest .ProseMirror h3 {
+  font-size: 1.5rem;
+  border-bottom: 1px dashed var(--ef-bg-4);
+  padding-bottom: 0.25rem;
+}
+
+.theme-everforest .ProseMirror h4 {
+  font-size: 1.25rem;
+}
+
+.theme-everforest .ProseMirror h5 {
+  font-size: 1.1rem;
+}
+
+.theme-everforest .ProseMirror h6 {
+  font-size: 1rem;
+  color: var(--ef-fg-muted);
+}
+
+/* Everforest - Strong/Bold - GREEN like original Typora */
+html.theme-everforest .ProseMirror strong,
+html.theme-everforest .ProseMirror b {
+  color: #a7c080 !important;
+  font-weight: 600 !important;
+}
+
+/* Everforest - Italic - PURPLE like original Typora */
+html.theme-everforest .ProseMirror em {
+  color: #d699b6 !important;
+  font-style: italic !important;
+}
+
+/* Everforest - Bold+Italic */
+html.theme-everforest .ProseMirror em strong,
+html.theme-everforest .ProseMirror strong em {
+  color: #d3c6aa !important;
+  font-weight: 600 !important;
+  font-style: italic !important;
+}
+
+/* Everforest - Links */
+html.theme-everforest .ProseMirror a {
+  color: #a7c080;
+  text-decoration: none;
+}
+
+html.theme-everforest .ProseMirror a:hover {
+  text-decoration: underline;
+}
+
+/* Everforest - Blockquotes */
+html.theme-everforest .ProseMirror blockquote {
+  margin: 1.25rem 0 !important;
+  padding: 0.8rem 1rem !important;
+  border-left: 4px solid #83c092 !important;
+  background: #3f484d !important;
+  color: var(--text-color) !important;
+  border-radius: 8px !important;
+  font-style: normal !important;
+}
+
+/* Everforest - Code Blocks */
+.theme-everforest .ProseMirror pre,
+.theme-everforest .code-block-wrapper {
+  background-color: var(--code-block-bg);
+  border: 1px solid var(--window-border);
+  border-radius: 10px;
+}
+
+/* Everforest - Inline Code */
+.theme-everforest .ProseMirror code {
+  font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  background: #363f44;
+  color: #d8edea;
+  border: 1px solid #495156;
+  padding: 0.15rem 0.35rem;
+  border-radius: 6px;
+}
+
+.theme-everforest .ProseMirror pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #d3c6aa;
+}
+
+/* Everforest - Syntax Highlighting */
+.theme-everforest .hljs-keyword,
+.theme-everforest .hljs-selector-tag {
+  color: #e67e80;
+  font-weight: 600;
+}
+
+.theme-everforest .hljs-string,
+.theme-everforest .hljs-doctag {
+  color: #a7c080;
+}
+
+.theme-everforest .hljs-comment {
+  color: #d699b6;
+  font-style: italic;
+}
+
+.theme-everforest .hljs-number,
+.theme-everforest .hljs-literal {
+  color: #e69875;
+}
+
+.theme-everforest .hljs-title,
+.theme-everforest .hljs-function .hljs-title {
+  color: #7fbbb3;
+}
+
+.theme-everforest .hljs-built_in,
+.theme-everforest .hljs-type {
+  color: #83c092;
+}
+
+.theme-everforest .hljs-variable,
+.theme-everforest .hljs-template-variable {
+  color: #d3c6aa;
+}
+
+.theme-everforest .hljs-attr,
+.theme-everforest .hljs-attribute {
+  color: #dbbc7f;
+}
+
+.theme-everforest .hljs-tag {
+  color: #e67e80;
+}
+
+.theme-everforest .hljs-params {
+  color: #e69875;
+}
+
+/* Everforest - Additional syntax tokens for better coverage */
+.theme-everforest .hljs-class,
+.theme-everforest .hljs-function {
+  color: #7fbbb3;
+}
+
+.theme-everforest .hljs-meta,
+.theme-everforest .hljs-meta-keyword {
+  color: #d699b6;
+}
+
+.theme-everforest .hljs-property {
+  color: #83c092;
+}
+
+.theme-everforest .hljs-operator,
+.theme-everforest .hljs-punctuation {
+  color: #d3c6aa;
+}
+
+.theme-everforest .hljs-regexp {
+  color: #e67e80;
+}
+
+.theme-everforest .hljs-selector-class,
+.theme-everforest .hljs-selector-id {
+  color: #7fbbb3;
+}
+
+.theme-everforest .hljs-selector-pseudo,
+.theme-everforest .hljs-selector-attr {
+  color: #83c092;
+}
+
+.theme-everforest .hljs-name {
+  color: #e67e80;
+}
+
+.theme-everforest .hljs-symbol {
+  color: #dbbc7f;
+}
+
+.theme-everforest .hljs-deletion {
+  color: #e67e80;
+  background-color: rgba(230, 126, 128, 0.1);
+}
+
+.theme-everforest .hljs-addition {
+  color: #a7c080;
+  background-color: rgba(167, 192, 128, 0.1);
+}
+
+/* Everforest - Tables */
+.theme-everforest .ProseMirror table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #363f44;
+  border: 1px solid #444c50;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.theme-everforest .ProseMirror th,
+.theme-everforest .ProseMirror td {
+  border-bottom: 1px solid #495156;
+  padding: 0.6rem 0.75rem;
+}
+
+.theme-everforest .ProseMirror thead th {
+  background: #3f484d;
+  color: var(--text-color);
+}
+
+/* Everforest - HR */
+.theme-everforest .ProseMirror hr {
+  border: none;
+  border-top: 1px solid #3a4246;
+  margin: 2rem 0;
+}
+
+/* Everforest - Selection */
+.theme-everforest ::selection {
+  background: #445047;
+  color: #fff;
+}
+
+/* Everforest - Scrollbar */
+.theme-everforest ::-webkit-scrollbar-thumb {
+  background: #52595f;
+  border-radius: 20px;
+}
+
+.theme-everforest ::-webkit-scrollbar-thumb:hover {
+  background: #5a6268;
+}
+
+/* Everforest - Task Lists */
+.theme-everforest .ProseMirror ul[data-type="taskList"] input[type="checkbox"] {
+  accent-color: #a7c080;
+}
+
+/* Everforest - Strikethrough */
+.theme-everforest .ProseMirror del,
+.theme-everforest .ProseMirror s {
+  color: #9da9a0;
+}
+
+/* ============================================
+   DRACULA THEME - Dark Purple Theme
+   ============================================ */
+
+.theme-dracula {
+  --bg-color: #282a36;
+  --text-color: #f8f8f2;
+  --side-bar-bg-color: #21222c;
+  --window-border: #44475a;
+  --active-file-bg-color: #44475a;
+  --active-file-text-color: #f8f8f2;
+  --item-hover-bg-color: #383a46;
+  --control-text-color: #6272a4;
+  --primary-color: #bd93f9;
+  --code-block-bg: #1e1f29;
+  --blockquote-border-color: #bd93f9;
+  --heading-color: #f8f8f2;
+}
+
+.theme-dracula,
+.theme-dracula body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Dracula - Headings */
+.theme-dracula .ProseMirror h1,
+.theme-dracula .ProseMirror h2,
+.theme-dracula .ProseMirror h3,
+.theme-dracula .ProseMirror h4,
+.theme-dracula .ProseMirror h5,
+.theme-dracula .ProseMirror h6 {
+  color: var(--heading-color);
+}
+
+/* Dracula - Strong/Bold */
+html.theme-dracula .ProseMirror strong {
+  color: #ff79c6 !important;
+  font-weight: 700 !important;
+}
+
+/* Dracula - Italic */
+html.theme-dracula .ProseMirror em {
+  color: #8be9fd !important;
+  font-style: italic !important;
+}
+
+/* Dracula - Blockquotes */
+html.theme-dracula .ProseMirror blockquote {
+  background-color: rgba(68, 71, 90, 0.5) !important;
+  border-left: 4px solid #bd93f9 !important;
+  padding: 1rem 1rem 1rem 1.5rem !important;
+  margin: 1.5rem 0 !important;
+  border-radius: 4px;
+}
+
+/* Dracula - Code blocks handled by existing syntax highlighting */
+.theme-dracula .ProseMirror pre {
+  background-color: var(--code-block-bg);
+}
+
+/* Dracula - Comprehensive Syntax Highlighting */
+.theme-dracula .hljs-keyword,
+.theme-dracula .hljs-selector-tag {
+  color: #ff79c6;
+  font-weight: 500;
+}
+
+.theme-dracula .hljs-string,
+.theme-dracula .hljs-doctag {
+  color: #f1fa8c;
+}
+
+.theme-dracula .hljs-comment {
+  color: #6272a4;
+  font-style: italic;
+}
+
+.theme-dracula .hljs-number,
+.theme-dracula .hljs-literal,
+.theme-dracula .hljs-boolean {
+  color: #bd93f9;
+}
+
+.theme-dracula .hljs-title,
+.theme-dracula .hljs-function .hljs-title {
+  color: #50fa7b;
+}
+
+.theme-dracula .hljs-built_in,
+.theme-dracula .hljs-type {
+  color: #8be9fd;
+  font-style: italic;
+}
+
+.theme-dracula .hljs-variable,
+.theme-dracula .hljs-template-variable {
+  color: #f8f8f2;
+}
+
+.theme-dracula .hljs-attr,
+.theme-dracula .hljs-attribute {
+  color: #50fa7b;
+}
+
+.theme-dracula .hljs-tag {
+  color: #ff79c6;
+}
+
+.theme-dracula .hljs-name {
+  color: #ff79c6;
+}
+
+.theme-dracula .hljs-params {
+  color: #ffb86c;
+}
+
+.theme-dracula .hljs-class {
+  color: #8be9fd;
+}
+
+.theme-dracula .hljs-function {
+  color: #50fa7b;
+}
+
+.theme-dracula .hljs-meta,
+.theme-dracula .hljs-meta-keyword {
+  color: #ff79c6;
+}
+
+.theme-dracula .hljs-property {
+  color: #66d9ef;
+}
+
+.theme-dracula .hljs-operator {
+  color: #ff79c6;
+}
+
+.theme-dracula .hljs-punctuation {
+  color: #f8f8f2;
+}
+
+.theme-dracula .hljs-regexp {
+  color: #f1fa8c;
+}
+
+.theme-dracula .hljs-selector-class,
+.theme-dracula .hljs-selector-id {
+  color: #8be9fd;
+}
+
+.theme-dracula .hljs-symbol {
+  color: #bd93f9;
+}
+
+.theme-dracula .hljs-deletion {
+  color: #ff5555;
+  background-color: rgba(255, 85, 85, 0.1);
+}
+
+.theme-dracula .hljs-addition {
+  color: #50fa7b;
+  background-color: rgba(80, 250, 123, 0.1);
 }

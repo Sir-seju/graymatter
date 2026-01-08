@@ -143,12 +143,12 @@ export function createApplicationMenu(win: BrowserWindow) {
         { type: 'separator' } as MenuItemConstructorOptions,
         {
           label: 'Toggle Sidebar',
-          accelerator: 'CmdOrCtrl+/',
+          accelerator: 'CmdOrCtrl+Shift+B',
           click: () => win.webContents.send('menu-action', 'toggle-sidebar')
         },
         {
           label: 'Toggle Source Mode',
-          accelerator: 'CmdOrCtrl+Shift+U',
+          accelerator: 'CmdOrCtrl+/',
           click: () => win.webContents.send('menu-action', 'toggle-source-mode')
         },
         { role: 'togglefullscreen' }

@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('electron', {
   saveAsset: (dest: string, base64: string) => ipcRenderer.invoke('save-asset', dest, base64),
   exportPdf: () => ipcRenderer.invoke('export-pdf'),
   exportHtml: (html: string) => ipcRenderer.invoke('export-html', html),
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  showInFolder: (path: string) => ipcRenderer.invoke('show-in-folder', path),
   invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
   on: (channel: string, callback: Function) => {
     const listener = (event: any, ...args: any[]) => callback(event, ...args);

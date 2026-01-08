@@ -32,8 +32,11 @@ function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Sidebar Width (fixed)
-  const sidebarWidth = 280;
+  // Sidebar Width (resizable)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('typora-sidebar-width');
+    return saved ? parseInt(saved, 10) : 280;
+  });
 
   // Tab bar auto-hide (start hidden for clean look)
   const [isTitleBarVisible, setIsTitleBarVisible] = useState(false);
@@ -54,9 +57,17 @@ function App() {
   // Stats State
   const [stats, setStats] = useState({ words: 0, characters: 0, blockType: 'paragraph' });
 
+  // Handle sidebar width change
+  const handleSidebarWidthChange = (newWidth: number) => {
+    setSidebarWidth(newWidth);
+    localStorage.setItem('typora-sidebar-width', String(newWidth));
+  };
+
   // Refs to access latest state in event listeners without re-binding
   const tabsRef = useRef(tabs);
   const activeTabIdRef = useRef(activeTabId);
+  // Track recently saved files to avoid reloading them from our own save
+  const recentlySavedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     tabsRef.current = tabs;
@@ -182,6 +193,10 @@ function App() {
 
     if (path) {
       try {
+        // Mark as recently saved to ignore the file-changed event from our own save
+        recentlySavedRef.current.add(path);
+        setTimeout(() => recentlySavedRef.current.delete(path), 500); // Clear after 500ms
+
         await window.electron.writeFile(path, currentTab.content);
         // Mark as clean
         setTabs(prev => prev.map(t =>
@@ -189,6 +204,8 @@ function App() {
         ));
       } catch (error) {
         console.error("Save failed", error);
+        // Remove from recently saved on error
+        recentlySavedRef.current.delete(path);
       }
     }
   };
@@ -298,10 +315,15 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         e.preventDefault();
         saveFile();
       }
-      // Format shortcuts backup
-      if (isMod && e.shiftKey && e.key === 'u') {
+      // Toggle Source Mode: Cmd+/
+      if (isMod && e.key === '/') {
         e.preventDefault();
         editorRef.current?.toggleSourceMode();
+      }
+      // Toggle Sidebar: Cmd+Shift+B
+      if (isMod && e.shiftKey && e.key === 'b') {
+        e.preventDefault();
+        setSidebarOpen(prev => !prev);
       }
       if (isMod && !e.shiftKey && e.key === 'b') {
         e.preventDefault();
@@ -349,27 +371,62 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
     applyTheme(theme);
   }, []);
 
+  // Listen for external file changes and reload content
+  useEffect(() => {
+    const removeListener = window.electron.on('file-changed', async (_: any, data: { eventType: string; fullPath: string }) => {
+      const { fullPath } = data;
+
+      // Ignore if this was our own save
+      if (recentlySavedRef.current.has(fullPath)) {
+        return;
+      }
+
+      // Check if the changed file is open in any tab
+      const affectedTab = tabsRef.current.find(tab => tab.path === fullPath);
+
+      if (affectedTab) {
+        // Only reload if the tab is not currently dirty (has unsaved changes)
+        // This prevents overwriting user's unsaved work
+        if (!affectedTab.isDirty) {
+          try {
+            const newContent = await window.electron.readFile(fullPath);
+            setTabs(prev => prev.map(tab =>
+              tab.path === fullPath
+                ? { ...tab, content: newContent }
+                : tab
+            ));
+          } catch (err) {
+            console.error('Failed to reload file:', fullPath, err);
+          }
+        }
+      }
+    });
+
+    return () => removeListener();
+  }, []);
+
   return (
     <div className="h-screen w-screen flex flex-col" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>
       {/* Main Content Area - Full Screen */}
       <div className="flex-1 flex overflow-hidden relative">
 
-        {/* Sidebar with integrated drag bar */}
+        {/* Sidebar with integrated drag bar - smooth animation */}
         <div
-          className="h-full flex-shrink-0 relative"
+          className="h-full flex-shrink-0 relative transition-all duration-300 ease-in-out overflow-hidden"
           style={{
-            display: isSidebarOpen ? 'flex' : 'none',
-            width: `${sidebarWidth}px`
+            width: isSidebarOpen ? `${sidebarWidth}px` : '0px',
+            opacity: isSidebarOpen ? 1 : 0
           }}
         >
           <Sidebar
             currentPath={activeTab.path}
             onFileSelect={handleFileSelect}
             onClose={() => setSidebarOpen(false)}
+            onToggle={() => setSidebarOpen(prev => !prev)}
             onRename={(oldPath, newPath) => {
               setTabs(prev => prev.map(t => {
                 if (t.path === oldPath) return { ...t, path: newPath };
-                // Also handle cleaning up children paths if folder rename? 
+                // Also handle cleaning up children paths if folder rename?
                 // For now just file rename.
                 if (t.path?.startsWith(oldPath + '/')) {
                   return { ...t, path: t.path.replace(oldPath, newPath) };
@@ -379,6 +436,8 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             }}
             onScrollToLine={(line) => editorRef.current?.scrollToLine(line)}
             activeContent={activeTab.content}
+            width={sidebarWidth}
+            onWidthChange={handleSidebarWidthChange}
           />
         </div>
 
@@ -400,7 +459,8 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             style={{
               backgroundColor: 'var(--side-bar-bg-color)',
               borderBottom: isTitleBarVisible ? '1px solid var(--window-border)' : 'none',
-              WebkitAppRegion: 'drag'
+              WebkitAppRegion: 'drag',
+              paddingLeft: isSidebarOpen ? '0px' : '80px' // Space for traffic lights when sidebar is closed
             } as any}
           >
             {tabs.map(tab => {

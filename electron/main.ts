@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { join } from 'node:path';
@@ -18,6 +18,8 @@ let fileWatcher: FileWatcher | null = null;
 
 function createWindow() {
   win = new BrowserWindow({
+    width: 1200,
+    height: 800,
     icon: join(process.env.VITE_PUBLIC as string, 'electron-vite.svg'),
     frame: false,
     titleBarStyle: 'hiddenInset',
@@ -272,6 +274,28 @@ app.whenReady().then(() => {
       await fs.writeFile(filePath, htmlContent, 'utf-8');
       return { success: true, path: filePath };
     } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Open external URLs in default browser
+  ipcMain.handle('open-external', async (_: unknown, url: string) => {
+    try {
+      await shell.openExternal(url);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Open external failed:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Show item in Finder/Explorer
+  ipcMain.handle('show-in-folder', async (_: unknown, filePath: string) => {
+    try {
+      shell.showItemInFolder(filePath);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Show in folder failed:', error);
       return { success: false, error: error.message };
     }
   });
