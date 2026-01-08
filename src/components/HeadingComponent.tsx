@@ -46,15 +46,15 @@ const HeadingComponent = ({ node, editor, getPos }: any) => {
   return (
     <NodeViewWrapper className={`heading-node relative group`}>
       <span
-        className={`font-sans font-medium select-none transition-opacity duration-200 px-1.5 py-0.5 rounded ${isActive ? 'opacity-100' : 'opacity-0'}`}
+        className={`heading-badge font-sans font-semibold select-none transition-opacity duration-200 px-2.5 py-1.5 rounded ${isActive ? 'opacity-100' : 'opacity-0'}`}
         style={{
           color: 'var(--control-text-color)',
           backgroundColor: 'var(--item-hover-bg-color)',
-          fontSize: '0.7rem',
+          fontSize: '1rem',
           position: 'absolute',
           right: '100%',
-          marginRight: '8px',
-          top: '0.3em',
+          marginRight: '14px',
+          top: '0.2em',
           zIndex: 10,
         }}
         contentEditable={false}
