@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d3436"/>
+      <stop offset="50%" style="stop-color:#1a1d1e"/>
+      <stop offset="100%" style="stop-color:#0d1011"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a7c080"/>
+      <stop offset="100%" style="stop-color:#83c092"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="64" y="64" width="896" height="896" rx="180" ry="180" fill="url(#bgGrad)" filter="url(#shadow)"/>
+
+  <!-- Subtle inner border -->
+  <rect x="84" y="84" width="856" height="856" rx="160" ry="160" fill="none" stroke="#3d4647" stroke-width="2" opacity="0.5"/>
+
+  <!-- Document/Page shape -->
+  <path d="M280 200 L680 200 L744 264 L744 824 L280 824 Z" fill="#1e2324" stroke="#3d4647" stroke-width="2"/>
+  <path d="M680 200 L680 264 L744 264" fill="#2d3436" stroke="#3d4647" stroke-width="2"/>
+
+  <!-- Markdown lines with Everforest green accent -->
+  <!-- Header line -->
+  <rect x="330" y="300" width="200" height="28" rx="4" fill="url(#accentGrad)" filter="url(#glow)"/>
+
+  <!-- Text lines -->
+  <rect x="330" y="380" width="340" height="16" rx="3" fill="#4d5657" opacity="0.8"/>
+  <rect x="330" y="420" width="280" height="16" rx="3" fill="#4d5657" opacity="0.6"/>
+  <rect x="330" y="460" width="320" height="16" rx="3" fill="#4d5657" opacity="0.7"/>
+
+  <!-- Code block -->
+  <rect x="330" y="520" width="360" height="100" rx="8" fill="#1a1d1e" stroke="#3d4647" stroke-width="1"/>
+  <rect x="350" y="545" width="120" height="12" rx="2" fill="#e67e80" opacity="0.9"/>
+  <rect x="480" y="545" width="80" height="12" rx="2" fill="#a7c080" opacity="0.9"/>
+  <rect x="350" y="570" width="180" height="12" rx="2" fill="#7fbbb3" opacity="0.9"/>
+  <rect x="350" y="595" width="100" height="12" rx="2" fill="#dbbc7f" opacity="0.9"/>
+
+  <!-- More text lines -->
+  <rect x="330" y="660" width="300" height="16" rx="3" fill="#4d5657" opacity="0.7"/>
+  <rect x="330" y="700" width="260" height="16" rx="3" fill="#4d5657" opacity="0.5"/>
+  <rect x="330" y="740" width="340" height="16" rx="3" fill="#4d5657" opacity="0.6"/>
+
+  <!-- Accent mark/cursor -->
+  <rect x="322" y="300" width="4" height="28" rx="2" fill="#a7c080" filter="url(#glow)"/>
+
+  <!-- Floating markdown symbols -->
+  <text x="180" y="380" font-family="SF Mono, Monaco, monospace" font-size="48" font-weight="bold" fill="url(#accentGrad)" opacity="0.6">#</text>
+  <text x="800" y="550" font-family="SF Mono, Monaco, monospace" font-size="36" font-weight="bold" fill="#7fbbb3" opacity="0.4">*</text>
+  <text x="820" y="700" font-family="SF Mono, Monaco, monospace" font-size="32" font-weight="bold" fill="#dbbc7f" opacity="0.3">&gt;</text>
+</svg>

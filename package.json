@@ -1,13 +1,54 @@
 {
   "name": "gray-matter",
   "productName": "GrayMatter",
+  "description": "A beautiful, free markdown editor for note-taking and studying",
+  "author": "Uwasan Maku <uw.maku@gmail.com>",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "ELECTRON_RUN_AS_NODE= vite",
     "build": "tsc && vite build && electron-builder",
+    "build:mac": "tsc && vite build && electron-builder --mac",
     "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.graymatter.app",
+    "productName": "GrayMatter",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64"]
+        }
+      ],
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "title": "GrayMatter",
+      "icon": "build/icon.icns",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
   },
   "dependencies": {
     "@tiptap/extension-character-count": "^2.10.3",
@@ -23,15 +64,18 @@
     "@tiptap/pm": "^2.10.3",
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
+    "@types/prismjs": "^1.26.5",
     "classnames": "^2.5.1",
     "clsx": "^2.0.0",
     "katex": "^0.16.9",
     "lowlight": "^3.1.0",
     "lucide-react": "^0.300.0",
     "marked": "^11.0.0",
+    "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^2.0.0",
+    "tiptap-extension-code-block-prism": "^0.0.2-e",
     "tiptap-markdown": "^0.9.0",
     "turndown": "^7.1.2"
   },

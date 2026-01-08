@@ -1,5 +1,4 @@
 import CharacterCount from '@tiptap/extension-character-count';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -10,10 +9,10 @@ import Typography from '@tiptap/extension-typography';
 import Underline from '@tiptap/extension-underline';
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { common, createLowlight } from 'lowlight';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Markdown } from 'tiptap-markdown';
 import CodeBlockComponent from './CodeBlockComponent';
+import { CodeBlockPrism } from './extensions/CodeBlockPrism';
 import { HeadingExtension } from './extensions/HeadingExtension';
 import { InlineMathExtension } from './extensions/InlineMathExtension';
 import { MathExtension } from './extensions/MathExtension';
@@ -424,12 +423,10 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
         heading: false, // Disable default heading
       }),
       HeadingExtension, // Add our custom heading
-      CodeBlockLowlight.extend({
+      CodeBlockPrism.extend({
         addNodeView() {
           return ReactNodeViewRenderer(CodeBlockComponent)
         },
-      }).configure({
-        lowlight: createLowlight(common),
       }),
       MathExtension,
       InlineMathExtension,

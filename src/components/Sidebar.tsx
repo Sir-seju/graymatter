@@ -144,6 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [renameValue, setRenameValue] = useState('');
   const [clipboard, setClipboard] = useState<{ path: string; name: string } | null>(null);
   const [dragOverPath, setDragOverPath] = useState<string | null>(null);
+  const [draggingPath, setDraggingPath] = useState<string | null>(null);
 
   // New item modal state
   const [newItemModal, setNewItemModal] = useState<{ open: boolean; type: 'file' | 'folder'; parentPath: string }>({
@@ -475,7 +476,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     if (node.kind === 'file') {
       e.dataTransfer.setData('text/plain', node.path);
       e.dataTransfer.effectAllowed = 'move';
+      setDraggingPath(node.path);
     }
+  };
+
+  const handleDragEnd = () => {
+    setDraggingPath(null);
+    setDragOverPath(null);
   };
 
   const handleDragOver = (e: React.DragEvent, node: FileNode) => {
@@ -550,28 +557,42 @@ const Sidebar: React.FC<SidebarProps> = ({
     const paddingLeft = 12 + depth * 16;
     const isRenaming = renamingNodeId === node.path;
     const isDragOver = dragOverPath === node.path;
+    const isDragging = draggingPath === node.path;
 
     if (node.kind === 'directory') {
       return (
         <div key={node.path}>
           <div
-            className={`sidebar-item flex items-center py-1.5 px-2 cursor-pointer rounded-md transition-colors group ${isDragOver ? 'ring-2 ring-blue-400' : ''}`}
+            className="sidebar-item flex items-center py-1.5 px-2 cursor-pointer rounded-md transition-all duration-150 group"
             style={{
               paddingLeft,
               backgroundColor: isDragOver ? 'var(--item-hover-bg-color)' : (isActive ? 'var(--active-file-bg-color)' : 'transparent'),
-              color: isActive ? 'var(--active-file-text-color)' : 'inherit'
+              color: isActive ? 'var(--active-file-text-color)' : 'inherit',
+              border: isDragOver ? '1px dashed var(--primary-color)' : '1px dashed transparent',
+              transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
+              boxShadow: isDragOver ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'
             }}
             onClick={() => toggleFolder(node)}
             onContextMenu={(e) => handleContextMenu(e, node)}
             onDragOver={(e) => handleDragOver(e, node)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, node.path)}
+            onMouseEnter={(e) => {
+              if (!isActive && !isDragOver) {
+                e.currentTarget.style.backgroundColor = 'var(--item-hover-bg-color)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive && !isDragOver) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
           >
             {node.isOpen ? <ChevronDown size={12} className="mr-1 opacity-50 flex-shrink-0" /> : <ChevronRight size={12} className="mr-1 opacity-50 flex-shrink-0" />}
             {node.isOpen ? (
-              <FolderOpen size={14} className="mr-2 flex-shrink-0" style={{ color: 'var(--primary-color)' }} />
+              <FolderOpen size={14} className="mr-2 flex-shrink-0" style={{ color: isDragOver ? 'var(--primary-color)' : 'var(--primary-color)', opacity: isDragOver ? 1 : 0.8 }} />
             ) : (
-              <Folder size={14} className="mr-2 flex-shrink-0" style={{ color: 'var(--primary-color)' }} />
+              <Folder size={14} className="mr-2 flex-shrink-0" style={{ color: isDragOver ? 'var(--primary-color)' : 'var(--primary-color)', opacity: isDragOver ? 1 : 0.8 }} />
             )}
             {isRenaming ? (
               <input
@@ -603,16 +624,29 @@ const Sidebar: React.FC<SidebarProps> = ({
     return (
       <div
         key={node.path}
-        className="sidebar-item flex items-center py-1.5 px-2 cursor-pointer rounded-md transition-colors group"
+        className="sidebar-item flex items-center py-1.5 px-2 cursor-pointer rounded-md transition-all duration-150 group"
         style={{
           paddingLeft,
           backgroundColor: isActive ? 'var(--active-file-bg-color)' : 'transparent',
-          color: isActive ? 'var(--active-file-text-color)' : 'inherit'
+          color: isActive ? 'var(--active-file-text-color)' : 'inherit',
+          opacity: isDragging ? 0.5 : 1,
+          transform: isDragging ? 'scale(0.98)' : 'scale(1)'
         }}
         draggable
         onDragStart={(e) => handleDragStart(e, node)}
+        onDragEnd={handleDragEnd}
         onClick={() => onFileSelect(node.path)}
         onContextMenu={(e) => handleContextMenu(e, node)}
+        onMouseEnter={(e) => {
+          if (!isActive && !isDragging) {
+            e.currentTarget.style.backgroundColor = 'var(--item-hover-bg-color)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive && !isDragging) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
       >
         <File size={14} className="mr-2 opacity-50 flex-shrink-0" />
         {isRenaming ? (
@@ -658,10 +692,22 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <div className="flex flex-col items-center gap-1 flex-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div
-              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all"
+              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 hover:opacity-100"
               style={{
                 backgroundColor: activeTab === 'files' ? 'var(--item-hover-bg-color)' : 'transparent',
-                opacity: activeTab === 'files' ? 1 : 0.6
+                opacity: activeTab === 'files' ? 1 : 0.5
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'files') {
+                  e.currentTarget.style.backgroundColor = 'var(--item-hover-bg-color)';
+                  e.currentTarget.style.opacity = '0.9';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'files') {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.opacity = '0.5';
+                }
               }}
               onClick={() => activeTab === 'files' ? onToggle() : setActiveTab('files')}
               title="Files"
@@ -669,10 +715,22 @@ const Sidebar: React.FC<SidebarProps> = ({
               <Files size={18} />
             </div>
             <div
-              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all"
+              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 hover:opacity-100"
               style={{
                 backgroundColor: activeTab === 'search' ? 'var(--item-hover-bg-color)' : 'transparent',
-                opacity: activeTab === 'search' ? 1 : 0.6
+                opacity: activeTab === 'search' ? 1 : 0.5
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'search') {
+                  e.currentTarget.style.backgroundColor = 'var(--item-hover-bg-color)';
+                  e.currentTarget.style.opacity = '0.9';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'search') {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.opacity = '0.5';
+                }
               }}
               onClick={() => activeTab === 'search' ? onToggle() : setActiveTab('search')}
               title="Search"
@@ -680,10 +738,22 @@ const Sidebar: React.FC<SidebarProps> = ({
               <Search size={18} />
             </div>
             <div
-              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all"
+              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 hover:opacity-100"
               style={{
                 backgroundColor: activeTab === 'outline' ? 'var(--item-hover-bg-color)' : 'transparent',
-                opacity: activeTab === 'outline' ? 1 : 0.6
+                opacity: activeTab === 'outline' ? 1 : 0.5
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'outline') {
+                  e.currentTarget.style.backgroundColor = 'var(--item-hover-bg-color)';
+                  e.currentTarget.style.opacity = '0.9';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'outline') {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.opacity = '0.5';
+                }
               }}
               onClick={() => activeTab === 'outline' ? onToggle() : setActiveTab('outline')}
               title="Outline"
@@ -732,7 +802,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div
-              className={`flex-1 overflow-y-auto px-1.5 py-1 ${dragOverPath === rootPath ? 'ring-2 ring-inset ring-blue-400' : ''}`}
+              className="flex-1 overflow-y-auto px-1.5 py-1 transition-colors duration-150"
+              style={{
+                backgroundColor: dragOverPath === rootPath ? 'var(--item-hover-bg-color)' : 'transparent'
+              }}
               onDragOver={handleDragOverRoot}
               onDragLeave={handleDragLeave}
               onDrop={(e) => {
@@ -742,19 +815,96 @@ const Sidebar: React.FC<SidebarProps> = ({
               onContextMenu={handleRootContextMenu}
             >
               {!rootPath ? (
-                <div className="flex flex-col items-center justify-center h-full space-y-4 text-center p-4">
-                  <div className="p-4 rounded-full mb-2" style={{ backgroundColor: 'var(--item-hover-bg-color)' }}>
-                    <FolderOpen size={32} className="opacity-40" />
+                <div className="flex flex-col items-center justify-center h-full text-center px-6 py-8">
+                  {/* Animated folder icon */}
+                  <div
+                    className="relative mb-6 group cursor-pointer"
+                    onClick={handleOpenFolder}
+                  >
+                    <div
+                      className="w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-105"
+                      style={{
+                        backgroundColor: 'var(--item-hover-bg-color)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <FolderOpen
+                        size={36}
+                        className="transition-all duration-300 group-hover:scale-110"
+                        style={{ color: 'var(--primary-color)', opacity: 0.7 }}
+                      />
+                    </div>
+                    {/* Subtle glow effect on hover */}
+                    <div
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      style={{
+                        boxShadow: '0 0 30px var(--primary-color)',
+                        opacity: 0.15
+                      }}
+                    />
                   </div>
-                  <div className="opacity-50 text-sm font-medium">No Folder Opened</div>
-                  <p className="text-xs opacity-40 max-w-[180px]">Open a folder to start managing your markdown files.</p>
+
+                  <h3
+                    className="text-base font-semibold mb-2"
+                    style={{ color: 'var(--text-color)', opacity: 0.8 }}
+                  >
+                    No Folder Opened
+                  </h3>
+
+                  <p
+                    className="text-xs leading-relaxed mb-6 max-w-[200px]"
+                    style={{ color: 'var(--control-text-color)', opacity: 0.6 }}
+                  >
+                    Open a folder to start managing your markdown files.
+                  </p>
+
                   <button
                     onClick={handleOpenFolder}
-                    className="px-4 py-1.5 rounded text-xs font-medium transition-colors"
-                    style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
+                    className="px-5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none"
+                    style={{
+                      backgroundColor: 'var(--primary-color)',
+                      color: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                    }}
                   >
                     Open Folder
                   </button>
+
+                  {/* Keyboard shortcut hint */}
+                  <div
+                    className="mt-4 flex items-center gap-1.5 text-[10px]"
+                    style={{ color: 'var(--control-text-color)', opacity: 0.4 }}
+                  >
+                    <kbd
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono"
+                      style={{
+                        backgroundColor: 'var(--item-hover-bg-color)',
+                        border: '1px solid var(--window-border)'
+                      }}
+                    >
+                      ⌘
+                    </kbd>
+                    <span>+</span>
+                    <kbd
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono"
+                      style={{
+                        backgroundColor: 'var(--item-hover-bg-color)',
+                        border: '1px solid var(--window-border)'
+                      }}
+                    >
+                      Shift
+                    </kbd>
+                    <span>+</span>
+                    <kbd
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono"
+                      style={{
+                        backgroundColor: 'var(--item-hover-bg-color)',
+                        border: '1px solid var(--window-border)'
+                      }}
+                    >
+                      O
+                    </kbd>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-0.5">{fileTree.map(node => renderNode(node))}</div>
@@ -767,11 +917,19 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="p-3 flex-shrink-0" style={{ borderBottom: '1px solid var(--window-border)' }}>
               <form onSubmit={handleSearch} className="flex gap-1.5 mb-2">
                 <input
-                  className="flex-1 rounded-lg px-3 py-1.5 text-sm outline-none min-w-0"
+                  className="flex-1 rounded-lg px-3 py-1.5 text-sm outline-none min-w-0 transition-all duration-150 hover:border-opacity-80 focus:border-opacity-100"
                   style={{
                     backgroundColor: 'var(--bg-color)',
                     border: '1px solid var(--window-border)',
                     color: 'var(--text-color)'
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'var(--window-border)'}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                  onMouseLeave={(e) => {
+                    if (document.activeElement !== e.currentTarget) {
+                      e.currentTarget.style.borderColor = 'var(--window-border)';
+                    }
                   }}
                   placeholder="Search in folder..."
                   value={searchQuery}
@@ -779,7 +937,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 />
                 <button
                   type="submit"
-                  className="p-2 rounded-lg transition-colors flex-shrink-0"
+                  className="p-2 rounded-lg transition-all duration-150 flex-shrink-0 hover:opacity-90 active:scale-95"
                   style={{ backgroundColor: 'var(--primary-color)', color: '#fff' }}
                 >
                   <Search size={12} />

@@ -325,6 +325,12 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         e.preventDefault();
         setSidebarOpen(prev => !prev);
       }
+      // Open Folder: Cmd+Shift+O
+      if (isMod && e.shiftKey && e.key === 'o') {
+        e.preventDefault();
+        // Dispatch event to open folder dialog
+        window.electron.openFolder();
+      }
       if (isMod && !e.shiftKey && e.key === 'b') {
         e.preventDefault();
         editorRef.current?.toggleBold();

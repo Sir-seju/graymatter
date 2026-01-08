@@ -1,5 +1,4 @@
 @import 'katex/dist/katex.min.css';
-@import 'highlight.js/styles/github-dark.css';
 
 @tailwind base;
 @tailwind components;
@@ -32,6 +31,15 @@ body {
   border-radius: 10px;
 }
 
+/* Global focus styling - remove default browser outlines */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: none;
+}
+
 /* Sidebar styling using CSS variables */
 .sidebar {
   background-color: var(--side-bar-bg-color);
@@ -46,6 +54,13 @@ body {
 .sidebar-item.active {
   background-color: var(--active-file-bg-color);
   color: var(--active-file-text-color);
+}
+
+/* Sidebar focus states - subtle and non-intrusive */
+.sidebar button:focus,
+.sidebar div[tabindex]:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 /* Editor area */
@@ -1320,4 +1335,483 @@ html.theme-dracula .ProseMirror blockquote {
 .theme-dracula .hljs-addition {
   color: #50fa7b;
   background-color: rgba(80, 250, 123, 0.1);
+}
+
+/* ============================================
+   PRISM.JS SYNTAX HIGHLIGHTING TOKENS
+   These styles apply to Prism's token classes
+   ============================================ */
+
+/* Base Prism token styling */
+.ProseMirror pre .token {
+  font-family: inherit;
+}
+
+/* Default/Light Theme Prism */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #24292e;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #005cc5;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #22863a;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #d73a49;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #d73a49;
+}
+
+.token.function,
+.token.class-name {
+  color: #6f42c1;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #e36209;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+/* Bash-specific tokens - the main improvement over highlight.js */
+.token.command,
+.token.builtin {
+  color: #005cc5;
+}
+
+.token.function {
+  color: #6f42c1;
+}
+
+.token.parameter,
+.token.assign-left {
+  color: #e36209;
+}
+
+/* Shell/Bash specific improvements */
+.token.environment {
+  color: #6f42c1;
+}
+
+.token.file-descriptor {
+  color: #005cc5;
+}
+
+/* ============================================
+   NIGHT THEME - Prism Tokens
+   ============================================ */
+
+.theme-night .token.comment,
+.theme-night .token.prolog,
+.theme-night .token.doctype,
+.theme-night .token.cdata {
+  color: #6272a4;
+  font-style: italic;
+}
+
+.theme-night .token.punctuation {
+  color: #f8f8f2;
+}
+
+.theme-night .token.property,
+.theme-night .token.tag,
+.theme-night .token.constant,
+.theme-night .token.symbol,
+.theme-night .token.deleted {
+  color: #ff79c6;
+}
+
+.theme-night .token.boolean,
+.theme-night .token.number {
+  color: #bd93f9;
+}
+
+.theme-night .token.selector,
+.theme-night .token.attr-name,
+.theme-night .token.string,
+.theme-night .token.char,
+.theme-night .token.builtin,
+.theme-night .token.inserted {
+  color: #f1fa8c;
+}
+
+.theme-night .token.operator,
+.theme-night .token.entity,
+.theme-night .token.url,
+.theme-night .language-css .token.string,
+.theme-night .style .token.string {
+  color: #ff79c6;
+}
+
+.theme-night .token.atrule,
+.theme-night .token.attr-value,
+.theme-night .token.keyword {
+  color: #ff79c6;
+  font-weight: 500;
+}
+
+.theme-night .token.function,
+.theme-night .token.class-name {
+  color: #50fa7b;
+}
+
+.theme-night .token.regex,
+.theme-night .token.important,
+.theme-night .token.variable {
+  color: #ffb86c;
+}
+
+/* Bash specific - Night */
+.theme-night .token.command {
+  color: #8be9fd;
+}
+
+.theme-night .token.parameter,
+.theme-night .token.flag {
+  color: #ffb86c;
+}
+
+/* ============================================
+   DRACULA THEME - Prism Tokens
+   ============================================ */
+
+.theme-dracula .token.comment,
+.theme-dracula .token.prolog,
+.theme-dracula .token.doctype,
+.theme-dracula .token.cdata {
+  color: #6272a4;
+  font-style: italic;
+}
+
+.theme-dracula .token.punctuation {
+  color: #f8f8f2;
+}
+
+.theme-dracula .token.property,
+.theme-dracula .token.tag,
+.theme-dracula .token.constant,
+.theme-dracula .token.symbol,
+.theme-dracula .token.deleted {
+  color: #ff79c6;
+}
+
+.theme-dracula .token.boolean,
+.theme-dracula .token.number {
+  color: #bd93f9;
+}
+
+.theme-dracula .token.selector,
+.theme-dracula .token.attr-name,
+.theme-dracula .token.string,
+.theme-dracula .token.char,
+.theme-dracula .token.builtin,
+.theme-dracula .token.inserted {
+  color: #f1fa8c;
+}
+
+.theme-dracula .token.operator,
+.theme-dracula .token.entity,
+.theme-dracula .token.url,
+.theme-dracula .language-css .token.string,
+.theme-dracula .style .token.string {
+  color: #ff79c6;
+}
+
+.theme-dracula .token.atrule,
+.theme-dracula .token.attr-value,
+.theme-dracula .token.keyword {
+  color: #ff79c6;
+  font-weight: 500;
+}
+
+.theme-dracula .token.function,
+.theme-dracula .token.class-name {
+  color: #50fa7b;
+}
+
+.theme-dracula .token.regex,
+.theme-dracula .token.important,
+.theme-dracula .token.variable {
+  color: #ffb86c;
+}
+
+/* Bash specific - Dracula */
+.theme-dracula .token.command {
+  color: #8be9fd;
+}
+
+.theme-dracula .token.parameter,
+.theme-dracula .token.flag {
+  color: #ffb86c;
+}
+
+/* ============================================
+   EVERFOREST THEME - Prism Tokens
+   ============================================ */
+
+.theme-everforest .token.comment,
+.theme-everforest .token.prolog,
+.theme-everforest .token.doctype,
+.theme-everforest .token.cdata {
+  color: #83c092;
+  font-style: italic;
+}
+
+.theme-everforest .token.punctuation {
+  color: #d3c6aa;
+}
+
+.theme-everforest .token.property,
+.theme-everforest .token.tag,
+.theme-everforest .token.constant,
+.theme-everforest .token.symbol,
+.theme-everforest .token.deleted {
+  color: #e67e80;
+}
+
+.theme-everforest .token.boolean,
+.theme-everforest .token.number {
+  color: #d699b6;
+}
+
+.theme-everforest .token.selector,
+.theme-everforest .token.attr-name,
+.theme-everforest .token.string,
+.theme-everforest .token.char,
+.theme-everforest .token.builtin,
+.theme-everforest .token.inserted {
+  color: #a7c080;
+}
+
+.theme-everforest .token.operator,
+.theme-everforest .token.entity,
+.theme-everforest .token.url,
+.theme-everforest .language-css .token.string,
+.theme-everforest .style .token.string {
+  color: #e67e80;
+}
+
+.theme-everforest .token.atrule,
+.theme-everforest .token.attr-value,
+.theme-everforest .token.keyword {
+  color: #e67e80;
+  font-weight: 600;
+}
+
+.theme-everforest .token.function,
+.theme-everforest .token.class-name {
+  color: #7fbbb3;
+}
+
+.theme-everforest .token.regex,
+.theme-everforest .token.important,
+.theme-everforest .token.variable {
+  color: #dbbc7f;
+}
+
+/* Bash specific - Everforest */
+.theme-everforest .token.command {
+  color: #7fbbb3;
+}
+
+.theme-everforest .token.parameter,
+.theme-everforest .token.flag,
+.theme-everforest .token.attr-name {
+  color: #e69875;
+}
+
+/* Environment variables and special bash tokens */
+.theme-everforest .token.environment,
+.theme-everforest .token.variable {
+  color: #dbbc7f;
+}
+
+.theme-everforest .token.assign-left {
+  color: #7fbbb3;
+}
+
+/* ============================================
+   NORD THEME - Prism Tokens
+   ============================================ */
+
+.theme-nord .token.comment,
+.theme-nord .token.prolog,
+.theme-nord .token.doctype,
+.theme-nord .token.cdata {
+  color: #616E88;
+  font-style: italic;
+}
+
+.theme-nord .token.punctuation {
+  color: #ECEFF4;
+}
+
+.theme-nord .token.property,
+.theme-nord .token.tag,
+.theme-nord .token.constant,
+.theme-nord .token.symbol,
+.theme-nord .token.deleted {
+  color: #81A1C1;
+}
+
+.theme-nord .token.boolean,
+.theme-nord .token.number {
+  color: #B48EAD;
+}
+
+.theme-nord .token.selector,
+.theme-nord .token.attr-name,
+.theme-nord .token.string,
+.theme-nord .token.char,
+.theme-nord .token.builtin,
+.theme-nord .token.inserted {
+  color: #A3BE8C;
+}
+
+.theme-nord .token.operator,
+.theme-nord .token.entity,
+.theme-nord .token.url,
+.theme-nord .language-css .token.string,
+.theme-nord .style .token.string {
+  color: #81A1C1;
+}
+
+.theme-nord .token.atrule,
+.theme-nord .token.attr-value,
+.theme-nord .token.keyword {
+  color: #81A1C1;
+}
+
+.theme-nord .token.function,
+.theme-nord .token.class-name {
+  color: #8FBCBB;
+}
+
+.theme-nord .token.regex,
+.theme-nord .token.important,
+.theme-nord .token.variable {
+  color: #EBCB8B;
+}
+
+/* Bash specific - Nord */
+.theme-nord .token.command {
+  color: #88C0D0;
+}
+
+.theme-nord .token.parameter,
+.theme-nord .token.flag {
+  color: #EBCB8B;
+}
+
+/* ============================================
+   GITHUB THEME - Prism Tokens
+   ============================================ */
+
+.theme-github .token.comment,
+.theme-github .token.prolog,
+.theme-github .token.doctype,
+.theme-github .token.cdata {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.theme-github .token.punctuation {
+  color: #24292e;
+}
+
+.theme-github .token.property,
+.theme-github .token.tag,
+.theme-github .token.constant,
+.theme-github .token.symbol,
+.theme-github .token.deleted {
+  color: #005cc5;
+}
+
+.theme-github .token.boolean,
+.theme-github .token.number {
+  color: #005cc5;
+}
+
+.theme-github .token.selector,
+.theme-github .token.attr-name,
+.theme-github .token.string,
+.theme-github .token.char,
+.theme-github .token.builtin,
+.theme-github .token.inserted {
+  color: #22863a;
+}
+
+.theme-github .token.operator,
+.theme-github .token.entity,
+.theme-github .token.url,
+.theme-github .language-css .token.string,
+.theme-github .style .token.string {
+  color: #d73a49;
+}
+
+.theme-github .token.atrule,
+.theme-github .token.attr-value,
+.theme-github .token.keyword {
+  color: #d73a49;
+}
+
+.theme-github .token.function,
+.theme-github .token.class-name {
+  color: #6f42c1;
+}
+
+.theme-github .token.regex,
+.theme-github .token.important,
+.theme-github .token.variable {
+  color: #e36209;
+}
+
+/* Bash specific - GitHub */
+.theme-github .token.command {
+  color: #005cc5;
+}
+
+.theme-github .token.parameter,
+.theme-github .token.flag {
+  color: #e36209;
 }
