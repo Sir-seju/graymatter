@@ -4,7 +4,7 @@
   "description": "A beautiful, free markdown editor for note-taking and studying",
   "author": "Uwasan Maku <uw.maku@gmail.com>",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "ELECTRON_RUN_AS_NODE= vite",
@@ -28,7 +28,9 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64"]
+          "arch": [
+            "arm64"
+          ]
         }
       ],
       "darkModeSupport": true
