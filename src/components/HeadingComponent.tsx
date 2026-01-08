@@ -44,14 +44,18 @@ const HeadingComponent = ({ node, editor, getPos }: any) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
 
   return (
-    <NodeViewWrapper className={`heading-node relative group flex items-baseline`}>
+    <NodeViewWrapper className={`heading-node relative group`}>
       <span
-        className={`font-sans font-semibold mr-3 select-none transition-opacity duration-200 px-2 py-1 rounded-md ${isActive ? 'opacity-100' : 'opacity-0'}`}
+        className={`font-sans font-medium select-none transition-opacity duration-200 px-1.5 py-0.5 rounded ${isActive ? 'opacity-100' : 'opacity-0'}`}
         style={{
-          color: 'var(--primary-color)',
+          color: 'var(--control-text-color)',
           backgroundColor: 'var(--item-hover-bg-color)',
-          fontSize: '0.85rem',
-          letterSpacing: '0.02em',
+          fontSize: '0.7rem',
+          position: 'absolute',
+          right: '100%',
+          marginRight: '8px',
+          top: '0.3em',
+          zIndex: 10,
         }}
         contentEditable={false}
       >

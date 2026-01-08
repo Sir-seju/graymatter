@@ -40,7 +40,7 @@ So I did what any reasonable developer would do at 2 AM instead of sleeping—I 
 ## Features
 
 - **Live Preview** — What you see is what you get. No split panes, no mental context switching.
-- **Beautiful Themes** — Ships with Everforest, Dracula, Nord, and more. Because your eyes deserve nice things.
+- **Beautiful Themes** — Ships with 6 distinct themes: Everforest, Night, Dracula, Monokai, Solarized Dark, and Solarized Light.
 - **Syntax Highlighting** — 20+ languages pre-loaded (Go, Rust, Python, Terraform, TypeScript, etc.). Your code blocks will look *chef's kiss*.
 - **File Management** — Full sidebar with folder tree, search across files, and document outline.
 - **Keyboard First** — `⌘+Shift+O` to open folders, `⌘+S` to save, and all the shortcuts you'd expect.
@@ -130,15 +130,16 @@ graymatter/
 
 ## Themes
 
-GrayMatter comes with carefully crafted themes:
+GrayMatter comes with 6 carefully crafted themes, each with its own distinct personality:
 
 | Theme | Vibe |
 |-------|------|
-| **Everforest** | Soft green, easy on the eyes, perfect for late nights |
-| **Dracula** | The classic purple-pink dark theme |
-| **Nord** | Cool, arctic blues |
-| **GitHub Dark** | What you'd expect |
-| **Solarized** | For the OGs |
+| **Everforest** | Soft green forest tones, easy on the eyes, perfect for late nights |
+| **Night** | Deep dark minimal with GitHub-style underlined headers |
+| **Dracula** | Gothic purple vibes with centered titles and colorful headings |
+| **Monokai** | Classic code editor aesthetic with monospace fonts and vibrant syntax colors |
+| **Solarized Dark** | Warm academic feel with serif fonts on deep blue |
+| **Solarized Light** | Cream paper aesthetic, perfect for daytime writing |
 
 ---
 

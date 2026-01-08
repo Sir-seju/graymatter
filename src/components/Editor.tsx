@@ -39,9 +39,11 @@ const SourceModeEditor: React.FC<{
   // Sync scroll between all elements
   const handleScroll = useCallback(() => {
     if (textareaRef.current && highlightRef.current && lineNumbersRef.current) {
-      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
-      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
-      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
+      const scrollTop = textareaRef.current.scrollTop;
+      const scrollLeft = textareaRef.current.scrollLeft;
+      highlightRef.current.scrollTop = scrollTop;
+      highlightRef.current.scrollLeft = scrollLeft;
+      lineNumbersRef.current.scrollTop = scrollTop;
     }
   }, []);
 
@@ -62,62 +64,67 @@ const SourceModeEditor: React.FC<{
 
   const baseLineHeight = fontSize * 1.6;
 
-  // Render highlighted content with markdown syntax styling
+  // Render highlighted content - simple approach that matches textarea exactly
+  // Just colorize syntax markers without changing font sizes
   const renderHighlightedContent = () => {
-    const lines = content.split('\n');
-    return lines.map((line, i) => {
-      // Detect line type and apply styling
-      const h1Match = line.match(/^(# )(.*)$/);
-      const h2Match = line.match(/^(## )(.*)$/);
-      const h3Match = line.match(/^(### )(.*)$/);
-      const h4Match = line.match(/^(#### )(.*)$/);
-      const h5Match = line.match(/^(##### )(.*)$/);
-      const h6Match = line.match(/^(###### )(.*)$/);
-      const blockquoteMatch = line.match(/^(> )(.*)$/);
-      const listMatch = line.match(/^(\s*[-*+] )(.*)$/);
-      const orderedListMatch = line.match(/^(\s*\d+\. )(.*)$/);
+    // Apply syntax highlighting via regex replacements
+    let highlighted = content;
 
-      let lineStyle: React.CSSProperties = {
-        minHeight: `${baseLineHeight}px`,
-        lineHeight: `${baseLineHeight}px`,
-      };
-      let content: React.ReactNode = line || '\u200B';
+    // Escape HTML
+    highlighted = highlighted
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
 
-      // Headers - larger font sizes like Typora
-      if (h1Match) {
-        lineStyle = { ...lineStyle, fontSize: `${fontSize * 1.8}px`, lineHeight: `${fontSize * 2.2}px`, minHeight: `${fontSize * 2.2}px`, fontWeight: 600 };
-        content = <><span className="source-syntax">{h1Match[1]}</span>{renderInlineStyles(h1Match[2])}</>;
-      } else if (h2Match) {
-        lineStyle = { ...lineStyle, fontSize: `${fontSize * 1.5}px`, lineHeight: `${fontSize * 1.9}px`, minHeight: `${fontSize * 1.9}px`, fontWeight: 600 };
-        content = <><span className="source-syntax">{h2Match[1]}</span>{renderInlineStyles(h2Match[2])}</>;
-      } else if (h3Match) {
-        lineStyle = { ...lineStyle, fontSize: `${fontSize * 1.3}px`, lineHeight: `${fontSize * 1.7}px`, minHeight: `${fontSize * 1.7}px`, fontWeight: 600 };
-        content = <><span className="source-syntax">{h3Match[1]}</span>{renderInlineStyles(h3Match[2])}</>;
-      } else if (h4Match) {
-        lineStyle = { ...lineStyle, fontSize: `${fontSize * 1.15}px`, lineHeight: `${fontSize * 1.5}px`, minHeight: `${fontSize * 1.5}px`, fontWeight: 500 };
-        content = <><span className="source-syntax">{h4Match[1]}</span>{renderInlineStyles(h4Match[2])}</>;
-      } else if (h5Match) {
-        lineStyle = { ...lineStyle, fontSize: `${fontSize * 1.05}px`, fontWeight: 500 };
-        content = <><span className="source-syntax">{h5Match[1]}</span>{renderInlineStyles(h5Match[2])}</>;
-      } else if (h6Match) {
-        lineStyle = { ...lineStyle, fontSize: `${fontSize}px`, fontWeight: 500, opacity: 0.85 };
-        content = <><span className="source-syntax">{h6Match[1]}</span>{renderInlineStyles(h6Match[2])}</>;
-      } else if (blockquoteMatch) {
-        content = <><span className="source-syntax source-blockquote">{blockquoteMatch[1]}</span>{renderInlineStyles(blockquoteMatch[2])}</>;
-      } else if (listMatch) {
-        content = <><span className="source-syntax">{listMatch[1]}</span>{renderInlineStyles(listMatch[2])}</>;
-      } else if (orderedListMatch) {
-        content = <><span className="source-syntax">{orderedListMatch[1]}</span>{renderInlineStyles(orderedListMatch[2])}</>;
-      } else {
-        content = renderInlineStyles(line) || '\u200B';
-      }
+    // Headers (# ## ### etc) - color the hash marks
+    highlighted = highlighted.replace(
+      /^(#{1,6} )(.*)$/gm,
+      '<span class="source-syntax">$1</span><span class="source-heading">$2</span>'
+    );
 
-      return (
-        <div key={i} className="source-line" style={lineStyle}>
-          {content}
-        </div>
-      );
-    });
+    // Blockquotes
+    highlighted = highlighted.replace(
+      /^(&gt; )(.*)$/gm,
+      '<span class="source-syntax source-blockquote">$1</span>$2'
+    );
+
+    // Bold **text**
+    highlighted = highlighted.replace(
+      /(\*\*|__)(.+?)\1/g,
+      '<span class="source-syntax">$1</span><span class="source-bold">$2</span><span class="source-syntax">$1</span>'
+    );
+
+    // Inline code `code`
+    highlighted = highlighted.replace(
+      /`([^`\n]+)`/g,
+      '<span class="source-syntax">`</span><span class="source-code">$1</span><span class="source-syntax">`</span>'
+    );
+
+    // Code blocks ```
+    highlighted = highlighted.replace(
+      /^(```\w*)$/gm,
+      '<span class="source-syntax">$1</span>'
+    );
+
+    // List markers
+    highlighted = highlighted.replace(
+      /^(\s*[-*+] )/gm,
+      '<span class="source-syntax">$1</span>'
+    );
+
+    // Ordered list markers
+    highlighted = highlighted.replace(
+      /^(\s*\d+\. )/gm,
+      '<span class="source-syntax">$1</span>'
+    );
+
+    // Links [text](url)
+    highlighted = highlighted.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<span class="source-syntax">[</span><span class="source-link-text">$1</span><span class="source-syntax">](</span><span class="source-link-url">$2</span><span class="source-syntax">)</span>'
+    );
+
+    return <div dangerouslySetInnerHTML={{ __html: highlighted }} />;
   };
 
   // Render inline styles (bold, italic, code, links)
@@ -215,13 +222,13 @@ const SourceModeEditor: React.FC<{
   const lineHeights = getLineHeights();
 
   return (
-    <div className="source-mode-container h-full overflow-auto flex justify-center" ref={containerRef} style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="source-mode-container h-full overflow-hidden flex justify-center" ref={containerRef} style={{ backgroundColor: 'var(--bg-color)' }}>
       {/* Centered content wrapper with line numbers inside */}
-      <div className="relative" style={{ maxWidth: '900px', width: '100%' }}>
+      <div className="relative h-full" style={{ maxWidth: '900px', width: '100%' }}>
         {/* Line Numbers - positioned inside the centered area, to the left of content */}
         <div
           ref={lineNumbersRef}
-          className="source-mode-line-numbers select-none absolute text-right pointer-events-none"
+          className="source-mode-line-numbers select-none absolute text-right pointer-events-none overflow-auto"
           style={{
             fontFamily: 'ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace',
             fontSize: `${fontSize * 0.8}px`,
@@ -229,7 +236,11 @@ const SourceModeEditor: React.FC<{
             opacity: 0.3,
             width: '40px',
             left: '8px',
-            top: '60px',
+            top: '0',
+            paddingTop: '60px',
+            height: '100%',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
           }}
         >
           {lineHeights.map((height, i) => {
@@ -243,41 +254,50 @@ const SourceModeEditor: React.FC<{
           })}
         </div>
 
-        {/* Syntax highlighted background layer */}
+        {/* Syntax highlighted background layer - scrollable, synced with textarea */}
         <div
           ref={highlightRef}
-          className="overflow-hidden pointer-events-none whitespace-pre-wrap break-words"
+          className="absolute inset-0 overflow-auto pointer-events-none"
           style={{
             fontFamily: 'ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace',
             fontSize: `${fontSize}px`,
             lineHeight: `${baseLineHeight}px`,
             color: 'var(--text-color)',
             padding: '60px 60px 100px 60px',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
           }}
           aria-hidden="true"
         >
           {renderHighlightedContent()}
         </div>
 
-        {/* Transparent textarea for editing */}
+        {/* Transparent textarea for editing - this is the scrollable element */}
         <textarea
           ref={textareaRef}
-          className="absolute inset-0 w-full h-full resize-none outline-none border-none"
+          className="absolute inset-0 w-full h-full resize-none outline-none border-none overflow-auto"
           value={content}
           onChange={(e) => onChange(e.target.value)}
           onScroll={handleScroll}
           onKeyDown={handleKeyDown}
           placeholder="Type your markdown source here..."
           spellCheck={false}
+          wrap="soft"
           style={{
             fontFamily: 'ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace',
             fontSize: `${fontSize}px`,
             lineHeight: `${baseLineHeight}px`,
             color: 'transparent',
             backgroundColor: 'transparent',
-            caretColor: 'var(--primary-color)',
+            caretColor: 'var(--text-color)',
             padding: '60px 60px 100px 60px',
             WebkitTextFillColor: 'transparent',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
           }}
         />
       </div>

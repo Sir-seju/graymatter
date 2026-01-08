@@ -149,6 +149,21 @@ pre code,
 }
 
 /* Source Mode Syntax Highlighting */
+/* Ensure highlight layer content matches textarea exactly */
+.source-mode-container [aria-hidden="true"] > div {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* All spans in highlight layer must not affect text flow */
+.source-mode-container [aria-hidden="true"] span {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
 .source-line {
   white-space: pre-wrap;
   word-break: break-word;
@@ -156,7 +171,12 @@ pre code,
 
 .source-syntax {
   color: var(--control-text-color);
-  opacity: 0.5;
+  opacity: 0.6;
+}
+
+.source-heading {
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 .source-bold {
@@ -170,16 +190,32 @@ pre code,
 
 .source-code {
   font-family: inherit;
-  background: rgba(128, 128, 128, 0.15);
-  border-radius: 3px;
-  padding: 1px 4px;
+  background: rgba(128, 128, 128, 0.2);
+  border-radius: 2px;
+  /* Use box-decoration-break for visual styling without affecting text flow */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  /* No padding, margin, or border - must match textarea character positions exactly */
 }
 
 .source-blockquote {
   color: var(--primary-color);
 }
 
+.source-link-text {
+  color: var(--primary-color);
+}
+
+.source-link-url {
+  color: var(--control-text-color);
+  opacity: 0.7;
+}
+
 /* Theme-specific source mode colors */
+.theme-everforest .source-heading {
+  color: #a7c080;
+}
+
 .theme-everforest .source-bold {
   color: #a7c080;
 }
@@ -193,6 +229,14 @@ pre code,
   color: #83c092;
 }
 
+.theme-everforest .source-code {
+  background: rgba(167, 192, 128, 0.15);
+}
+
+.theme-dracula .source-heading {
+  color: #bd93f9;
+}
+
 .theme-dracula .source-bold {
   color: #ff79c6;
 }
@@ -201,12 +245,80 @@ pre code,
   color: #bd93f9;
 }
 
+.theme-dracula .source-code {
+  background: rgba(189, 147, 249, 0.15);
+}
+
+.theme-dracula .source-link-text {
+  color: #8be9fd;
+}
+
+.theme-night .source-heading {
+  color: #58a6ff;
+}
+
 .theme-night .source-bold {
   color: #ffffff;
 }
 
-.theme-nord .source-bold {
-  color: #88C0D0;
+.theme-night .source-code {
+  background: rgba(110, 118, 129, 0.3);
+}
+
+.theme-night .source-link-text {
+  color: #58a6ff;
+}
+
+.theme-monokai .source-heading {
+  color: #f92672;
+}
+
+.theme-monokai .source-bold {
+  color: #f92672;
+}
+
+.theme-monokai .source-blockquote {
+  color: #e6db74;
+}
+
+.theme-monokai .source-code {
+  background: rgba(102, 217, 239, 0.15);
+}
+
+.theme-monokai .source-link-text {
+  color: #66d9ef;
+}
+
+.theme-solarizedDark .source-heading {
+  color: #b58900;
+}
+
+.theme-solarizedDark .source-bold {
+  color: #b58900;
+}
+
+.theme-solarizedDark .source-blockquote {
+  color: #2aa198;
+}
+
+.theme-solarizedDark .source-code {
+  background: rgba(38, 139, 210, 0.15);
+}
+
+.theme-solarizedLight .source-heading {
+  color: #b58900;
+}
+
+.theme-solarizedLight .source-bold {
+  color: #b58900;
+}
+
+.theme-solarizedLight .source-blockquote {
+  color: #2aa198;
+}
+
+.theme-solarizedLight .source-code {
+  background: rgba(38, 139, 210, 0.1);
 }
 
 /* Source Mode Scrollbar sync */
@@ -303,65 +415,66 @@ pre code,
   }
 }
 
-/* Headings */
-.ProseMirror h1 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--window-border);
+/* Headings - Base styles */
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
   line-height: 1.3;
 }
 
-/* ... (unchanged chunks omitted for brevity if I could, but I must match exact target) ... */
-/* Wait, I can't omit chunks in replace_file_content. sticking to the target strictly */
-/* Actually, I will just replace the specific sections. Using multi_replace might be safer but the target is contiguous-ish. */
-/* I will stick to the exact target block provided. */
+.ProseMirror h1 {
+  font-size: 2em;
+  font-weight: 700;
+}
 
 .ProseMirror h2 {
-  font-size: 1.75rem;
+  font-size: 1.5em;
   font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.8rem;
-  line-height: 1.3;
 }
 
 .ProseMirror h3 {
-  font-size: 1.4rem;
+  font-size: 1.25em;
   font-weight: 600;
-  margin-top: 1.25rem;
-  margin-bottom: 0.6rem;
-  line-height: 1.4;
 }
 
 .ProseMirror h4 {
-  font-size: 1.15rem;
-  font-weight: 500;
-  margin-top: 1.2rem;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.01em;
+  font-size: 1.1em;
+  font-weight: 600;
 }
 
-.ProseMirror h5,
-.ProseMirror h6 {
-  font-size: 1rem;
+.ProseMirror h5 {
+  font-size: 1em;
   font-weight: 600;
-  margin-top: 0.8rem;
-  margin-bottom: 0.4rem;
+}
+
+.ProseMirror h6 {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+/* First heading after nothing - reduce top margin */
+.ProseMirror > h1:first-child,
+.ProseMirror > h2:first-child,
+.ProseMirror > h3:first-child {
+  margin-top: 0;
 }
 
 /* Paragraphs */
 .ProseMirror p {
-  margin-bottom: 0.8rem;
+  margin-bottom: 1em;
   line-height: 1.7;
 }
 
 /* Lists */
 .ProseMirror ul,
 .ProseMirror ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
 }
 
 .ProseMirror ul {
@@ -378,12 +491,27 @@ pre code,
 }
 
 .ProseMirror li {
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.25em;
   line-height: 1.6;
 }
 
-.ProseMirror li>p {
-  margin-bottom: 0.25rem;
+.ProseMirror li > p {
+  margin-bottom: 0.25em;
+}
+
+/* Reduce top margin when heading follows paragraph */
+.ProseMirror p + h1,
+.ProseMirror p + h2,
+.ProseMirror p + h3,
+.ProseMirror p + h4 {
+  margin-top: 1.5em;
+}
+
+/* Reduce margin between consecutive headings */
+.ProseMirror h1 + h2,
+.ProseMirror h2 + h3,
+.ProseMirror h3 + h4 {
+  margin-top: 0.5em;
 }
 
 /* Ordered List Numbers */
@@ -405,13 +533,14 @@ pre code,
   /* Cleaner, no italics */
 }
 
-/* Code Blocks */
+/* Code Blocks - Base styling (border handled by CodeBlockComponent) */
 .ProseMirror pre {
-  background-color: #282c34;
-  color: #abb2bf;
-  border-radius: 6px;
-  padding: 1rem;
-  margin: 1rem 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
   overflow-x: auto;
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 0.9rem;
@@ -517,33 +646,36 @@ pre code,
 }
 
 /* ============================================
-   NIGHT THEME - Premium Dark Theme Styling
-   Based on Typora's Night theme
+   NIGHT THEME - Deep Dark Minimal
+   Clean, high contrast, professional
    ============================================ */
 
 .theme-night {
-  --bg-color: #363B40;
-  --text-color: #b8bfc6;
-  --side-bar-bg-color: #2E3033;
-  --window-border: #555555;
-  --active-file-bg-color: #222222;
+  --bg-color: #191919;
+  --text-color: #c9d1d9;
+  --side-bar-bg-color: #0d1117;
+  --window-border: #30363d;
+  --active-file-bg-color: #161b22;
   --active-file-text-color: #ffffff;
-  --item-hover-bg-color: #70717d;
-  --control-text-color: #b7b7b7;
-  --primary-color: #6dc1e7;
-  --heading-color: #DEDEDE;
-  --code-bg-color: #333333;
-  --blockquote-border-color: #474d54;
-  --selection-bg-color: #4a89dc;
+  --item-hover-bg-color: #21262d;
+  --control-text-color: #8b949e;
+  --primary-color: #58a6ff;
+  --heading-color: #ffffff;
+  --code-block-bg: #0d1117;
+  --blockquote-border-color: #3b82f6;
+  --selection-bg-color: #264f78;
 }
 
 .theme-night,
 .theme-night body {
   background-color: var(--bg-color);
   color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
 }
 
-/* Night Theme - Headings */
+/* Night Theme - Headings - Clean white, strong contrast */
 .theme-night .ProseMirror h1,
 .theme-night .ProseMirror h2,
 .theme-night .ProseMirror h3,
@@ -551,82 +683,90 @@ pre code,
 .theme-night .ProseMirror h5,
 .theme-night .ProseMirror h6 {
   color: var(--heading-color);
-  font-family: "Lucida Grande", "Corbel", -apple-system, sans-serif;
-  font-weight: normal;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
 }
 
 .theme-night .ProseMirror h1 {
-  font-size: 2.5rem;
-  letter-spacing: -1.5px;
-  margin-bottom: 1.5rem;
-  border-bottom: none;
-  padding-bottom: 0;
+  font-size: 2em;
+  font-weight: 700;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #30363d;
 }
 
 .theme-night .ProseMirror h2 {
-  font-size: 1.63rem;
-  letter-spacing: -1px;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+  font-size: 1.5em;
+  font-weight: 600;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid #21262d;
 }
 
 .theme-night .ProseMirror h3 {
-  font-size: 1.17rem;
-  letter-spacing: -1px;
-  font-weight: bold;
+  font-size: 1.25em;
 }
 
 .theme-night .ProseMirror h4 {
-  color: white;
+  font-size: 1.1em;
 }
 
-/* Night Theme - Strong/Bold */
+.theme-night .ProseMirror h5 {
+  font-size: 1em;
+  color: #8b949e;
+}
+
+.theme-night .ProseMirror h6 {
+  font-size: 0.9em;
+  color: #6e7681;
+}
+
 /* Night Theme - Strong/Bold */
 html.theme-night .ProseMirror strong {
   color: #ffffff !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
 }
 
-/* Night Theme - Links */
+/* Night Theme - Links - Blue accent */
 html.theme-night .ProseMirror a {
-  color: #e0e0e0;
-  text-decoration: underline;
-  transition: color 0.2s ease-in-out;
+  color: #58a6ff;
+  text-decoration: none;
 }
 
 html.theme-night .ProseMirror a:hover {
-  color: #ffffff;
+  text-decoration: underline;
 }
 
-/* Night Theme - Blockquotes */
+/* Night Theme - Blockquotes - Blue accent bar */
 html.theme-night .ProseMirror blockquote {
-  background-color: rgba(0, 0, 0, 0.4) !important;
-  /* Increased opacity for visibility */
-  border-left: 4px solid var(--blockquote-border-color) !important;
-  padding: 1rem 1rem 1rem 1.5rem !important;
-  margin: 1.5rem 0 !important;
-  color: #c0c5cc !important;
-  /* Brighter quote text */
-  font-style: normal !important;
-  border-radius: 4px;
+  border-left: 4px solid #3b82f6 !important;
+  padding: 0.5em 1em !important;
+  margin: 1em 0 !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #8b949e !important;
+  border-radius: 0 !important;
 }
 
-/* Night Theme - Code Blocks (Background handled by variable) */
-.theme-night .ProseMirror pre,
-.theme-night .code-block-wrapper {
-  /* Background handled by var(--code-block-bg) */
-  border: none;
+/* Night Theme - Code blocks */
+.theme-night .ProseMirror pre {
+  background: transparent !important;
+  border: none !important;
 }
 
 .theme-night .ProseMirror pre code {
-  color: #b8bfc6;
+  color: #c9d1d9;
+  font-family: "SF Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.9em;
 }
 
 /* Night Theme - Inline Code */
 .theme-night .ProseMirror code {
-  background-color: rgba(0, 0, 0, 0.15);
-  color: #b8bfc6;
-  padding: 2px 5px;
+  background: rgba(110, 118, 129, 0.4);
+  color: #e6edf3;
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  font-family: "SF Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.85em;
 }
 
 /* Night Theme - Syntax Highlighting Colors - Vibrant Dracula */
@@ -747,92 +887,409 @@ html.theme-night .ProseMirror blockquote {
 }
 
 /* ============================================
-   NORD THEME - Cool Nordic Palette
+   MONOKAI THEME - Vibrant Syntax Colors
+   Bold colorful headings, coding aesthetic
    ============================================ */
 
-.theme-nord {
-  --bg-color: #2E3440;
-  --text-color: #ECEFF4;
-  --side-bar-bg-color: #3B4252;
-  --window-border: #4C566A;
-  --active-file-bg-color: #434C5E;
-  --active-file-text-color: #ECEFF4;
-  --item-hover-bg-color: #4C566A;
-  --control-text-color: #D8DEE9;
-  --primary-color: #88C0D0;
-  --heading-color: #ECEFF4;
-  --code-bg-color: #3B4252;
+.theme-monokai {
+  --bg-color: #272822;
+  --text-color: #f8f8f2;
+  --side-bar-bg-color: #1e1f1a;
+  --window-border: #49483e;
+  --active-file-bg-color: #3e3d32;
+  --active-file-text-color: #f8f8f2;
+  --item-hover-bg-color: #3e3d32;
+  --control-text-color: #a59f85;
+  --primary-color: #a6e22e;
+  --code-block-bg: #1e1f1a;
+  --blockquote-border-color: #f92672;
+  --heading-color: #f8f8f2;
 }
 
-.theme-nord,
-.theme-nord body {
+.theme-monokai,
+.theme-monokai body {
   background-color: var(--bg-color);
   color: var(--text-color);
+  font-family: "Consolas", "Monaco", "Lucida Console", monospace;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-.theme-nord .ProseMirror h1,
-.theme-nord .ProseMirror h2,
-.theme-nord .ProseMirror h3,
-.theme-nord .ProseMirror h4,
-.theme-nord .ProseMirror h5,
-.theme-nord .ProseMirror h6 {
-  color: var(--heading-color);
+/* Monokai - Headings - VIBRANT COLORS, no borders */
+.theme-monokai .ProseMirror h1,
+.theme-monokai .ProseMirror h2,
+.theme-monokai .ProseMirror h3,
+.theme-monokai .ProseMirror h4,
+.theme-monokai .ProseMirror h5,
+.theme-monokai .ProseMirror h6 {
+  font-family: "Consolas", "Monaco", monospace;
+  font-weight: normal;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
 }
 
-.theme-nord .ProseMirror pre {
-  background-color: var(--code-bg-color);
+.theme-monokai .ProseMirror h1 {
+  font-size: 2.2em;
+  color: #f92672;
+  text-align: center;
 }
 
-/* Nord Syntax Highlighting */
-.theme-nord .hljs-keyword {
-  color: #81A1C1;
+.theme-monokai .ProseMirror h2 {
+  font-size: 1.5em;
+  color: #a6e22e;
 }
 
-.theme-nord .hljs-string {
-  color: #A3BE8C;
+.theme-monokai .ProseMirror h3 {
+  font-size: 1.3em;
+  color: #66d9ef;
 }
 
-.theme-nord .hljs-comment {
-  color: #616E88;
+.theme-monokai .ProseMirror h4 {
+  font-size: 1.1em;
+  color: #fd971f;
 }
 
-.theme-nord .hljs-number {
-  color: #B48EAD;
+.theme-monokai .ProseMirror h5 {
+  font-size: 1em;
+  color: #ae81ff;
 }
 
-.theme-nord .hljs-title {
-  color: #8FBCBB;
+.theme-monokai .ProseMirror h6 {
+  font-size: 0.9em;
+  color: #e6db74;
 }
 
-.theme-nord .hljs-built_in {
-  color: #88C0D0;
+/* Monokai - Strong/Bold - Pink */
+html.theme-monokai .ProseMirror strong {
+  color: #f92672 !important;
+  font-weight: bold !important;
+}
+
+/* Monokai - Italic - Cyan */
+html.theme-monokai .ProseMirror em {
+  color: #66d9ef !important;
+  font-style: italic !important;
+}
+
+/* Monokai - Links - Yellow */
+html.theme-monokai .ProseMirror a {
+  color: #e6db74;
+  text-decoration: none;
+  border-bottom: 1px dashed #e6db74;
+}
+
+html.theme-monokai .ProseMirror a:hover {
+  border-bottom-style: solid;
+}
+
+/* Monokai - Blockquotes - Pink accent */
+html.theme-monokai .ProseMirror blockquote {
+  background: transparent !important;
+  border-left: 3px solid #f92672 !important;
+  padding: 0.5em 1em !important;
+  margin: 1em 0 !important;
+  color: #a59f85 !important;
+  border-radius: 0 !important;
+}
+
+/* Monokai - Code blocks */
+.theme-monokai .ProseMirror pre {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Monokai - Inline Code - Pink text on dark */
+.theme-monokai .ProseMirror code {
+  background: #3e3d32;
+  color: #f92672;
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+.theme-monokai .ProseMirror pre code {
+  background: transparent;
+  color: #f8f8f2;
+  padding: 0;
+}
+
+/* Monokai - Tables */
+.theme-monokai .ProseMirror th,
+.theme-monokai .ProseMirror td {
+  border: 1px solid #49483e;
+}
+
+.theme-monokai .ProseMirror th {
+  background: #3e3d32;
+  color: #a6e22e;
+}
+
+/* Monokai - HR */
+.theme-monokai .ProseMirror hr {
+  border: none;
+  height: 1px;
+  background: #49483e;
+  margin: 2em 0;
 }
 
 /* ============================================
-   GITHUB THEME - Clean Light Theme
+   SOLARIZED DARK THEME - Scientific Precision
+   Warm colors on dark blue, serif headings
    ============================================ */
 
-.theme-github {
-  --bg-color: #ffffff;
-  --text-color: #24292e;
-  --side-bar-bg-color: #f6f8fa;
-  --window-border: #e1e4e8;
-  --active-file-bg-color: #e1e4e8;
-  --active-file-text-color: #24292e;
-  --item-hover-bg-color: #f0f0f0;
-  --control-text-color: #586069;
-  --primary-color: #0366d6;
-  --heading-color: #24292e;
-  --code-bg-color: #f6f8fa;
+.theme-solarizedDark {
+  --bg-color: #002b36;
+  --text-color: #93a1a1;
+  --side-bar-bg-color: #073642;
+  --window-border: #586e75;
+  --active-file-bg-color: #073642;
+  --active-file-text-color: #fdf6e3;
+  --item-hover-bg-color: #094858;
+  --control-text-color: #657b83;
+  --primary-color: #268bd2;
+  --code-block-bg: #073642;
+  --blockquote-border-color: #2aa198;
+  --heading-color: #fdf6e3;
 }
 
-.theme-github .ProseMirror pre {
-  background-color: var(--code-bg-color);
-  border: 1px solid var(--window-border);
+.theme-solarizedDark,
+.theme-solarizedDark body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Georgia", "Cambria", "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.8;
 }
 
-.theme-github .ProseMirror code {
-  background-color: rgba(27, 31, 35, 0.05);
+/* Solarized Dark - Headings - Serif, colored accents */
+.theme-solarizedDark .ProseMirror h1,
+.theme-solarizedDark .ProseMirror h2,
+.theme-solarizedDark .ProseMirror h3,
+.theme-solarizedDark .ProseMirror h4,
+.theme-solarizedDark .ProseMirror h5,
+.theme-solarizedDark .ProseMirror h6 {
+  font-family: "Georgia", "Cambria", serif;
+  font-weight: normal;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.theme-solarizedDark .ProseMirror h1 {
+  font-size: 1.8em;
+  color: #b58900;
+  border-bottom: 2px solid #073642;
+  padding-bottom: 0.2em;
+}
+
+.theme-solarizedDark .ProseMirror h2 {
+  font-size: 1.5em;
+  color: #cb4b16;
+}
+
+.theme-solarizedDark .ProseMirror h3 {
+  font-size: 1.3em;
+  color: #dc322f;
+}
+
+.theme-solarizedDark .ProseMirror h4 {
+  font-size: 1.15em;
+  color: #d33682;
+}
+
+.theme-solarizedDark .ProseMirror h5 {
+  font-size: 1em;
+  color: #6c71c4;
+}
+
+.theme-solarizedDark .ProseMirror h6 {
+  font-size: 0.9em;
+  color: #2aa198;
+}
+
+/* Solarized Dark - Strong/Bold - Yellow */
+html.theme-solarizedDark .ProseMirror strong {
+  color: #b58900 !important;
+  font-weight: bold !important;
+}
+
+/* Solarized Dark - Italic - Violet */
+html.theme-solarizedDark .ProseMirror em {
+  color: #6c71c4 !important;
+  font-style: italic !important;
+}
+
+/* Solarized Dark - Links - Blue */
+html.theme-solarizedDark .ProseMirror a {
+  color: #268bd2;
+  text-decoration: none;
+}
+
+html.theme-solarizedDark .ProseMirror a:hover {
+  text-decoration: underline;
+}
+
+/* Solarized Dark - Blockquotes - Cyan accent */
+html.theme-solarizedDark .ProseMirror blockquote {
+  background: rgba(7, 54, 66, 0.5) !important;
+  border-left: 3px solid #2aa198 !important;
+  padding: 0.5em 1em !important;
+  margin: 1em 0 !important;
+  color: #93a1a1 !important;
+  font-style: italic !important;
+  border-radius: 0 !important;
+}
+
+/* Solarized Dark - Code blocks */
+.theme-solarizedDark .ProseMirror pre {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Solarized Dark - Inline Code */
+.theme-solarizedDark .ProseMirror code {
+  background: #073642;
+  color: #dc322f;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid #586e75;
+}
+
+.theme-solarizedDark .ProseMirror pre code {
+  background: transparent;
+  border: none;
+  color: #839496;
+}
+
+/* ============================================
+   SOLARIZED LIGHT THEME - Warm Paper Feel
+   Cream background, serif, reading-optimized
+   ============================================ */
+
+.theme-solarizedLight {
+  --bg-color: #fdf6e3;
+  --text-color: #586e75;
+  --side-bar-bg-color: #eee8d5;
+  --window-border: #93a1a1;
+  --active-file-bg-color: #eee8d5;
+  --active-file-text-color: #073642;
+  --item-hover-bg-color: #f5efdc;
+  --control-text-color: #839496;
+  --primary-color: #268bd2;
+  --code-block-bg: #eee8d5;
+  --blockquote-border-color: #859900;
+  --heading-color: #073642;
+}
+
+.theme-solarizedLight,
+.theme-solarizedLight body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Georgia", "Cambria", "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* Solarized Light - Headings - Serif, warm colors */
+.theme-solarizedLight .ProseMirror h1,
+.theme-solarizedLight .ProseMirror h2,
+.theme-solarizedLight .ProseMirror h3,
+.theme-solarizedLight .ProseMirror h4,
+.theme-solarizedLight .ProseMirror h5,
+.theme-solarizedLight .ProseMirror h6 {
+  font-family: "Georgia", "Cambria", serif;
+  font-weight: normal;
+  color: var(--heading-color);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.theme-solarizedLight .ProseMirror h1 {
+  font-size: 1.8em;
+  color: #b58900;
+  border-bottom: 2px solid #eee8d5;
+  padding-bottom: 0.2em;
+}
+
+.theme-solarizedLight .ProseMirror h2 {
+  font-size: 1.5em;
+  color: #cb4b16;
+}
+
+.theme-solarizedLight .ProseMirror h3 {
+  font-size: 1.3em;
+  color: #dc322f;
+}
+
+.theme-solarizedLight .ProseMirror h4 {
+  font-size: 1.15em;
+  color: #d33682;
+}
+
+.theme-solarizedLight .ProseMirror h5 {
+  font-size: 1em;
+  color: #6c71c4;
+}
+
+.theme-solarizedLight .ProseMirror h6 {
+  font-size: 0.9em;
+  color: #2aa198;
+}
+
+/* Solarized Light - Strong/Bold - Dark */
+html.theme-solarizedLight .ProseMirror strong {
+  color: #073642 !important;
+  font-weight: bold !important;
+}
+
+/* Solarized Light - Italic - Violet */
+html.theme-solarizedLight .ProseMirror em {
+  color: #6c71c4 !important;
+  font-style: italic !important;
+}
+
+/* Solarized Light - Links - Blue */
+html.theme-solarizedLight .ProseMirror a {
+  color: #268bd2;
+  text-decoration: none;
+}
+
+html.theme-solarizedLight .ProseMirror a:hover {
+  text-decoration: underline;
+}
+
+/* Solarized Light - Blockquotes - Green accent */
+html.theme-solarizedLight .ProseMirror blockquote {
+  background: rgba(238, 232, 213, 0.5) !important;
+  border-left: 3px solid #859900 !important;
+  padding: 0.5em 1em !important;
+  margin: 1em 0 !important;
+  color: #657b83 !important;
+  font-style: italic !important;
+  border-radius: 0 !important;
+}
+
+/* Solarized Light - Code blocks */
+.theme-solarizedLight .ProseMirror pre {
+  background: transparent;
+}
+
+/* Solarized Light - Inline Code */
+.theme-solarizedLight .ProseMirror code {
+  background: #eee8d5;
+  color: #dc322f;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid #93a1a1;
+}
+
+.theme-solarizedLight .ProseMirror pre code {
+  background: transparent;
+  border: none;
+  color: #657b83;
 }
 
 /* ============================================
@@ -845,6 +1302,15 @@ html.theme-night .ProseMirror blockquote {
   margin: 1rem 0;
   border-radius: 6px;
   overflow: hidden;
+}
+
+/* Ensure all nested elements in code blocks are transparent - prevents double box */
+.code-block-wrapper pre,
+.code-block-wrapper code,
+.code-block-wrapper pre code {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Ensure code block content is editable and styled correctly */
@@ -989,12 +1455,9 @@ html.theme-everforest .ProseMirror blockquote {
   font-style: normal !important;
 }
 
-/* Everforest - Code Blocks */
-.theme-everforest .ProseMirror pre,
-.theme-everforest .code-block-wrapper {
-  background-color: var(--code-block-bg);
-  border: 1px solid var(--window-border);
-  border-radius: 10px;
+/* Everforest - Code blocks */
+.theme-everforest .ProseMirror pre {
+  background: transparent;
 }
 
 /* Everforest - Inline Code */
@@ -1173,7 +1636,8 @@ html.theme-everforest .ProseMirror blockquote {
 }
 
 /* ============================================
-   DRACULA THEME - Dark Purple Theme
+   DRACULA THEME - Gothic Purple Vibes
+   Purple accents, pink/cyan highlights
    ============================================ */
 
 .theme-dracula {
@@ -1183,10 +1647,10 @@ html.theme-everforest .ProseMirror blockquote {
   --window-border: #44475a;
   --active-file-bg-color: #44475a;
   --active-file-text-color: #f8f8f2;
-  --item-hover-bg-color: #383a46;
+  --item-hover-bg-color: #44475a;
   --control-text-color: #6272a4;
   --primary-color: #bd93f9;
-  --code-block-bg: #1e1f29;
+  --code-block-bg: #21222c;
   --blockquote-border-color: #bd93f9;
   --heading-color: #f8f8f2;
 }
@@ -1195,42 +1659,127 @@ html.theme-everforest .ProseMirror blockquote {
 .theme-dracula body {
   background-color: var(--bg-color);
   color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
-/* Dracula - Headings */
+/* Dracula - Headings - Purple/Pink/Cyan gradient feel */
 .theme-dracula .ProseMirror h1,
 .theme-dracula .ProseMirror h2,
 .theme-dracula .ProseMirror h3,
 .theme-dracula .ProseMirror h4,
 .theme-dracula .ProseMirror h5,
 .theme-dracula .ProseMirror h6 {
-  color: var(--heading-color);
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
 }
 
-/* Dracula - Strong/Bold */
+.theme-dracula .ProseMirror h1 {
+  font-size: 2.2em;
+  color: #bd93f9;
+  text-align: center;
+}
+
+.theme-dracula .ProseMirror h2 {
+  font-size: 1.5em;
+  color: #ff79c6;
+}
+
+.theme-dracula .ProseMirror h3 {
+  font-size: 1.25em;
+  color: #8be9fd;
+}
+
+.theme-dracula .ProseMirror h4 {
+  font-size: 1.1em;
+  color: #50fa7b;
+}
+
+.theme-dracula .ProseMirror h5 {
+  font-size: 1em;
+  color: #ffb86c;
+}
+
+.theme-dracula .ProseMirror h6 {
+  font-size: 0.9em;
+  color: #f1fa8c;
+}
+
+/* Dracula - Links - Cyan */
+html.theme-dracula .ProseMirror a {
+  color: #8be9fd;
+  text-decoration: none;
+}
+
+html.theme-dracula .ProseMirror a:hover {
+  text-decoration: underline;
+  color: #ff79c6;
+}
+
+/* Dracula - Inline Code - Green on dark */
+.theme-dracula .ProseMirror code {
+  background: #44475a;
+  color: #50fa7b;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: "Fira Code", "SF Mono", Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.theme-dracula .ProseMirror pre code {
+  background: transparent;
+  color: #f8f8f2;
+  padding: 0;
+}
+
+/* Dracula - Strong/Bold - Pink */
 html.theme-dracula .ProseMirror strong {
   color: #ff79c6 !important;
   font-weight: 700 !important;
 }
 
-/* Dracula - Italic */
+/* Dracula - Italic - Yellow */
 html.theme-dracula .ProseMirror em {
-  color: #8be9fd !important;
+  color: #f1fa8c !important;
   font-style: italic !important;
 }
 
-/* Dracula - Blockquotes */
+/* Dracula - Blockquotes - Purple accent */
 html.theme-dracula .ProseMirror blockquote {
-  background-color: rgba(68, 71, 90, 0.5) !important;
   border-left: 4px solid #bd93f9 !important;
-  padding: 1rem 1rem 1rem 1.5rem !important;
-  margin: 1.5rem 0 !important;
-  border-radius: 4px;
+  padding: 0.5em 1em !important;
+  margin: 1em 0 !important;
+  background: rgba(68, 71, 90, 0.5) !important;
+  color: #6272a4 !important;
+  border-radius: 0 !important;
 }
 
-/* Dracula - Code blocks handled by existing syntax highlighting */
+/* Dracula - Code blocks */
 .theme-dracula .ProseMirror pre {
-  background-color: var(--code-block-bg);
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Dracula - Tables */
+.theme-dracula .ProseMirror th,
+.theme-dracula .ProseMirror td {
+  border: 1px solid #44475a;
+}
+
+.theme-dracula .ProseMirror th {
+  background: #44475a;
+  color: #bd93f9;
+}
+
+/* Dracula - HR */
+.theme-dracula .ProseMirror hr {
+  background: #44475a;
+  height: 1px;
+  border: 0;
+  margin: 2em 0;
 }
 
 /* Dracula - Comprehensive Syntax Highlighting */
@@ -1671,147 +2220,221 @@ html.theme-dracula .ProseMirror blockquote {
 }
 
 /* ============================================
-   NORD THEME - Prism Tokens
+   MONOKAI THEME - Prism Tokens
    ============================================ */
 
-.theme-nord .token.comment,
-.theme-nord .token.prolog,
-.theme-nord .token.doctype,
-.theme-nord .token.cdata {
-  color: #616E88;
+.theme-monokai .token.comment,
+.theme-monokai .token.prolog,
+.theme-monokai .token.doctype,
+.theme-monokai .token.cdata {
+  color: #75715e;
   font-style: italic;
 }
 
-.theme-nord .token.punctuation {
-  color: #ECEFF4;
+.theme-monokai .token.punctuation {
+  color: #f8f8f2;
 }
 
-.theme-nord .token.property,
-.theme-nord .token.tag,
-.theme-nord .token.constant,
-.theme-nord .token.symbol,
-.theme-nord .token.deleted {
-  color: #81A1C1;
+.theme-monokai .token.property,
+.theme-monokai .token.tag,
+.theme-monokai .token.constant,
+.theme-monokai .token.symbol,
+.theme-monokai .token.deleted {
+  color: #f92672;
 }
 
-.theme-nord .token.boolean,
-.theme-nord .token.number {
-  color: #B48EAD;
+.theme-monokai .token.boolean,
+.theme-monokai .token.number {
+  color: #ae81ff;
 }
 
-.theme-nord .token.selector,
-.theme-nord .token.attr-name,
-.theme-nord .token.string,
-.theme-nord .token.char,
-.theme-nord .token.builtin,
-.theme-nord .token.inserted {
-  color: #A3BE8C;
+.theme-monokai .token.selector,
+.theme-monokai .token.attr-name,
+.theme-monokai .token.string,
+.theme-monokai .token.char,
+.theme-monokai .token.builtin,
+.theme-monokai .token.inserted {
+  color: #e6db74;
 }
 
-.theme-nord .token.operator,
-.theme-nord .token.entity,
-.theme-nord .token.url,
-.theme-nord .language-css .token.string,
-.theme-nord .style .token.string {
-  color: #81A1C1;
+.theme-monokai .token.operator,
+.theme-monokai .token.entity,
+.theme-monokai .token.url,
+.theme-monokai .language-css .token.string,
+.theme-monokai .style .token.string {
+  color: #f92672;
 }
 
-.theme-nord .token.atrule,
-.theme-nord .token.attr-value,
-.theme-nord .token.keyword {
-  color: #81A1C1;
+.theme-monokai .token.atrule,
+.theme-monokai .token.attr-value,
+.theme-monokai .token.keyword {
+  color: #f92672;
+  font-weight: 500;
 }
 
-.theme-nord .token.function,
-.theme-nord .token.class-name {
-  color: #8FBCBB;
+.theme-monokai .token.function,
+.theme-monokai .token.class-name {
+  color: #a6e22e;
 }
 
-.theme-nord .token.regex,
-.theme-nord .token.important,
-.theme-nord .token.variable {
-  color: #EBCB8B;
+.theme-monokai .token.regex,
+.theme-monokai .token.important,
+.theme-monokai .token.variable {
+  color: #fd971f;
 }
 
-/* Bash specific - Nord */
-.theme-nord .token.command {
-  color: #88C0D0;
+/* Bash specific - Monokai */
+.theme-monokai .token.command {
+  color: #66d9ef;
 }
 
-.theme-nord .token.parameter,
-.theme-nord .token.flag {
-  color: #EBCB8B;
+.theme-monokai .token.parameter,
+.theme-monokai .token.flag {
+  color: #fd971f;
 }
 
 /* ============================================
-   GITHUB THEME - Prism Tokens
+   SOLARIZED DARK THEME - Prism Tokens
    ============================================ */
 
-.theme-github .token.comment,
-.theme-github .token.prolog,
-.theme-github .token.doctype,
-.theme-github .token.cdata {
-  color: #6a737d;
+.theme-solarizedDark .token.comment,
+.theme-solarizedDark .token.prolog,
+.theme-solarizedDark .token.doctype,
+.theme-solarizedDark .token.cdata {
+  color: #586e75;
   font-style: italic;
 }
 
-.theme-github .token.punctuation {
-  color: #24292e;
+.theme-solarizedDark .token.punctuation {
+  color: #839496;
 }
 
-.theme-github .token.property,
-.theme-github .token.tag,
-.theme-github .token.constant,
-.theme-github .token.symbol,
-.theme-github .token.deleted {
-  color: #005cc5;
+.theme-solarizedDark .token.property,
+.theme-solarizedDark .token.tag,
+.theme-solarizedDark .token.constant,
+.theme-solarizedDark .token.symbol,
+.theme-solarizedDark .token.deleted {
+  color: #dc322f;
 }
 
-.theme-github .token.boolean,
-.theme-github .token.number {
-  color: #005cc5;
+.theme-solarizedDark .token.boolean,
+.theme-solarizedDark .token.number {
+  color: #d33682;
 }
 
-.theme-github .token.selector,
-.theme-github .token.attr-name,
-.theme-github .token.string,
-.theme-github .token.char,
-.theme-github .token.builtin,
-.theme-github .token.inserted {
-  color: #22863a;
+.theme-solarizedDark .token.selector,
+.theme-solarizedDark .token.attr-name,
+.theme-solarizedDark .token.string,
+.theme-solarizedDark .token.char,
+.theme-solarizedDark .token.builtin,
+.theme-solarizedDark .token.inserted {
+  color: #2aa198;
 }
 
-.theme-github .token.operator,
-.theme-github .token.entity,
-.theme-github .token.url,
-.theme-github .language-css .token.string,
-.theme-github .style .token.string {
-  color: #d73a49;
+.theme-solarizedDark .token.operator,
+.theme-solarizedDark .token.entity,
+.theme-solarizedDark .token.url,
+.theme-solarizedDark .language-css .token.string,
+.theme-solarizedDark .style .token.string {
+  color: #cb4b16;
 }
 
-.theme-github .token.atrule,
-.theme-github .token.attr-value,
-.theme-github .token.keyword {
-  color: #d73a49;
+.theme-solarizedDark .token.atrule,
+.theme-solarizedDark .token.attr-value,
+.theme-solarizedDark .token.keyword {
+  color: #859900;
 }
 
-.theme-github .token.function,
-.theme-github .token.class-name {
-  color: #6f42c1;
+.theme-solarizedDark .token.function,
+.theme-solarizedDark .token.class-name {
+  color: #268bd2;
 }
 
-.theme-github .token.regex,
-.theme-github .token.important,
-.theme-github .token.variable {
-  color: #e36209;
+.theme-solarizedDark .token.regex,
+.theme-solarizedDark .token.important,
+.theme-solarizedDark .token.variable {
+  color: #b58900;
 }
 
-/* Bash specific - GitHub */
-.theme-github .token.command {
-  color: #005cc5;
+/* Bash specific - Solarized Dark */
+.theme-solarizedDark .token.command {
+  color: #268bd2;
 }
 
-.theme-github .token.parameter,
-.theme-github .token.flag {
-  color: #e36209;
+.theme-solarizedDark .token.parameter,
+.theme-solarizedDark .token.flag {
+  color: #cb4b16;
+}
+
+/* ============================================
+   SOLARIZED LIGHT THEME - Prism Tokens
+   ============================================ */
+
+.theme-solarizedLight .token.comment,
+.theme-solarizedLight .token.prolog,
+.theme-solarizedLight .token.doctype,
+.theme-solarizedLight .token.cdata {
+  color: #93a1a1;
+  font-style: italic;
+}
+
+.theme-solarizedLight .token.punctuation {
+  color: #657b83;
+}
+
+.theme-solarizedLight .token.property,
+.theme-solarizedLight .token.tag,
+.theme-solarizedLight .token.constant,
+.theme-solarizedLight .token.symbol,
+.theme-solarizedLight .token.deleted {
+  color: #dc322f;
+}
+
+.theme-solarizedLight .token.boolean,
+.theme-solarizedLight .token.number {
+  color: #d33682;
+}
+
+.theme-solarizedLight .token.selector,
+.theme-solarizedLight .token.attr-name,
+.theme-solarizedLight .token.string,
+.theme-solarizedLight .token.char,
+.theme-solarizedLight .token.builtin,
+.theme-solarizedLight .token.inserted {
+  color: #2aa198;
+}
+
+.theme-solarizedLight .token.operator,
+.theme-solarizedLight .token.entity,
+.theme-solarizedLight .token.url,
+.theme-solarizedLight .language-css .token.string,
+.theme-solarizedLight .style .token.string {
+  color: #cb4b16;
+}
+
+.theme-solarizedLight .token.atrule,
+.theme-solarizedLight .token.attr-value,
+.theme-solarizedLight .token.keyword {
+  color: #859900;
+}
+
+.theme-solarizedLight .token.function,
+.theme-solarizedLight .token.class-name {
+  color: #268bd2;
+}
+
+.theme-solarizedLight .token.regex,
+.theme-solarizedLight .token.important,
+.theme-solarizedLight .token.variable {
+  color: #b58900;
+}
+
+/* Bash specific - Solarized Light */
+.theme-solarizedLight .token.command {
+  color: #268bd2;
+}
+
+.theme-solarizedLight .token.parameter,
+.theme-solarizedLight .token.flag {
+  color: #cb4b16;
 }

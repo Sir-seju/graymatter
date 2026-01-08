@@ -5,6 +5,7 @@ import { LanguageSelector } from './LanguageSelector';
 
 export default ({ node, updateAttributes }: any) => {
   const [copied, setCopied] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleCopy = () => {
     const code = node.textContent;
@@ -15,11 +16,16 @@ export default ({ node, updateAttributes }: any) => {
 
   return (
     <NodeViewWrapper
-      className="code-block-wrapper relative group my-6 rounded-lg overflow-hidden border border-gray-200 dark:border-none"
-      style={{ backgroundColor: 'var(--code-block-bg)' }}
+      className="code-block-wrapper relative group my-6 rounded-lg overflow-hidden"
+      style={{ backgroundColor: 'var(--code-block-bg)', border: '1px solid var(--window-border)' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Language Selector - Top Left */}
-      <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div
+        className="absolute top-2.5 left-3 z-10 transition-opacity duration-200"
+        style={{ opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}
+      >
         <LanguageSelector
           language={node.attrs.language}
           onChange={(lang) => updateAttributes({ language: lang === 'auto' ? null : lang })}
@@ -29,13 +35,22 @@ export default ({ node, updateAttributes }: any) => {
       {/* Copy Button - Top Right */}
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-white/90 dark:bg-gray-700/80 text-gray-500 hover:text-gray-800 dark:text-gray-300 rounded-md shadow-sm border border-gray-200 dark:border-gray-600"
+        className="absolute top-2.5 right-3 z-10 transition-opacity duration-200 p-1.5 rounded-md hover:bg-white/20 text-gray-400 hover:text-gray-200"
+        style={{ opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}
         title="Copy code"
       >
-        {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+        {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
       </button>
 
-      <pre spellCheck={false} className="m-0 p-3 transition-[padding] duration-200 group-hover:pt-10 font-mono text-sm overflow-x-auto bg-transparent">
+      <pre
+        spellCheck={false}
+        className="m-0 font-mono text-sm overflow-x-auto"
+        style={{
+          padding: isHovered ? '48px 16px 12px 16px' : '12px 16px',
+          transition: 'padding 200ms ease',
+          background: 'transparent'
+        }}
+      >
         <NodeViewContent {...({ as: 'code', spellCheck: false } as any)} />
       </pre>
     </NodeViewWrapper>
