@@ -271,7 +271,12 @@ pre code,
 }
 
 .theme-night .source-bold {
-  color: #ffffff;
+  color: #d8d4c8;
+}
+
+/* Ensure heading bold inside headings keeps heading color */
+.theme-night .source-heading .source-bold {
+  color: inherit;
 }
 
 .theme-night .source-code {
@@ -661,24 +666,25 @@ pre code,
 }
 
 /* ============================================
-   NIGHT THEME - Deep Dark Minimal
-   Clean, high contrast, professional
+   NIGHT THEME - Midnight Aurora
+   Deep dark with subtle color accents
+   Professional yet visually engaging
    ============================================ */
 
 .theme-night {
-  --bg-color: #232323;
-  --text-color: #b8b8b8;
-  --side-bar-bg-color: #1e1e1e;
-  --window-border: #333333;
-  --active-file-bg-color: #2a2a2a;
-  --active-file-text-color: #d0d0d0;
-  --item-hover-bg-color: #2f2f2f;
-  --control-text-color: #707070;
-  --primary-color: #58a6ff;
-  --heading-color: #d4d4d4;
-  --code-block-bg: #1a1a1a;
-  --blockquote-border-color: #404040;
-  --selection-bg-color: #264f78;
+  --bg-color: #13141c;
+  --text-color: #8891ab;
+  --side-bar-bg-color: #0f1016;
+  --window-border: #1e2230;
+  --active-file-bg-color: #1a1c28;
+  --active-file-text-color: #a0a8c0;
+  --item-hover-bg-color: #171922;
+  --control-text-color: #454d66;
+  --primary-color: #5d7cbf;
+  --heading-color: #a0a8c0;
+  --code-block-bg: #171922;
+  --blockquote-border-color: #2a3048;
+  --selection-bg-color: #283050;
 }
 
 .theme-night,
@@ -687,237 +693,371 @@ pre code,
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
-  font-weight: 300;
-  line-height: 1.6;
+  font-weight: 400;
+  line-height: 1.7;
   letter-spacing: -0.01em;
 }
 
-/* Night Theme - Headings - Elegant, clean like Typora */
+/* Night Theme - Headings - Colorful gradient hierarchy */
 .theme-night .ProseMirror h1,
 .theme-night .ProseMirror h2,
 .theme-night .ProseMirror h3,
 .theme-night .ProseMirror h4,
 .theme-night .ProseMirror h5,
 .theme-night .ProseMirror h6 {
-  color: #c8c8c8;
   font-weight: 600;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
   line-height: 1.3;
+  letter-spacing: -0.02em;
 }
 
+/* H1 - Muted lavender with underline */
 .theme-night .ProseMirror h1 {
-  font-size: 2.5em;
-  font-weight: 450;
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #9098b8;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid #2a3048;
 }
 
+/* H2 - Muted purple with lighter underline */
 .theme-night .ProseMirror h2 {
-  font-size: 1.4em;
+  font-size: 1.6em;
   font-weight: 600;
+  color: #8878a8;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid #1e2230;
 }
 
+/* H3 - Muted cyan, indented */
 .theme-night .ProseMirror h3 {
-  font-size: 1.2em;
+  font-size: 1.3em;
   font-weight: 600;
+  color: #5a9aaa;
+  padding-left: 1em;
 }
 
+/* H4 - Muted green */
 .theme-night .ProseMirror h4 {
-  font-size: 1.1em;
+  font-size: 1.15em;
   font-weight: 600;
+  color: #6a9a52;
 }
 
+/* H5 - Muted amber */
 .theme-night .ProseMirror h5 {
-  font-size: 1em;
+  font-size: 1.05em;
   font-weight: 600;
-  color: #b0b0b0;
+  color: #a08050;
 }
 
+/* H6 - Muted rose */
 .theme-night .ProseMirror h6 {
   font-size: 0.95em;
   font-weight: 600;
-  color: #909090;
+  color: #a06070;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Night Theme - Paragraphs - Consistent spacing */
+/* Night Theme - Paragraphs */
 .theme-night .ProseMirror p {
-  margin-bottom: 0.8em;
+  margin-bottom: 1em;
   margin-top: 0;
-  line-height: 1.6;
-  font-weight: 300;
+  line-height: 1.7;
+  font-weight: 400;
 }
 
-/* Night Theme - All content lighter weight */
+/* Night Theme - All content base weight */
 .theme-night .ProseMirror {
-  font-weight: 300;
+  font-weight: 400;
 }
 
-/* Night Theme - Lists - Square bullets like Typora */
+/* Night Theme - Lists with subtle markers */
 .theme-night .ProseMirror ul {
-  list-style-type: square;
+  list-style-type: disc;
+}
+
+.theme-night .ProseMirror ul li::marker {
+  color: #5d7cbf;
+}
+
+.theme-night .ProseMirror ol li::marker {
+  color: #8878a8;
+  font-weight: 600;
 }
 
 .theme-night .ProseMirror ul ul {
-  list-style-type: square;
+  list-style-type: circle;
 }
 
 .theme-night .ProseMirror ul ul ul {
   list-style-type: square;
 }
 
-/* Night Theme - Strong/Bold - Brighter for emphasis */
+/* Night Theme - Strong/Bold - Warm off-white, distinct from H2 purple */
 html.theme-night .ProseMirror strong,
-html.theme-night .ProseMirror b {
-  color: #f0f0f0 !important;
-  font-weight: 650 !important;
+html.theme-night .ProseMirror b,
+html.theme-night .ProseMirror p strong,
+html.theme-night .ProseMirror p b,
+html.theme-night .ProseMirror li strong,
+html.theme-night .ProseMirror li b,
+.theme-night .ProseMirror strong,
+.theme-night .ProseMirror b {
+  color: #d8d4c8 !important;
+  font-weight: 700 !important;
 }
 
-/* Night Theme - Links - Blue accent */
+/* Night Theme - Bold inside headings should keep heading color */
+html.theme-night .ProseMirror h1 strong,
+html.theme-night .ProseMirror h1 b,
+.theme-night .ProseMirror h1 strong,
+.theme-night .ProseMirror h1 b {
+  color: inherit !important;
+  font-weight: 800 !important;
+}
+
+html.theme-night .ProseMirror h2 strong,
+html.theme-night .ProseMirror h2 b,
+.theme-night .ProseMirror h2 strong,
+.theme-night .ProseMirror h2 b {
+  color: inherit !important;
+  font-weight: 700 !important;
+}
+
+html.theme-night .ProseMirror h3 strong,
+html.theme-night .ProseMirror h3 b,
+.theme-night .ProseMirror h3 strong,
+.theme-night .ProseMirror h3 b,
+html.theme-night .ProseMirror h4 strong,
+html.theme-night .ProseMirror h4 b,
+.theme-night .ProseMirror h4 strong,
+.theme-night .ProseMirror h4 b,
+html.theme-night .ProseMirror h5 strong,
+html.theme-night .ProseMirror h5 b,
+.theme-night .ProseMirror h5 strong,
+.theme-night .ProseMirror h5 b,
+html.theme-night .ProseMirror h6 strong,
+html.theme-night .ProseMirror h6 b,
+.theme-night .ProseMirror h6 strong,
+.theme-night .ProseMirror h6 b {
+  color: inherit !important;
+  font-weight: 700 !important;
+}
+
+/* Night Theme - Italic - Slightly brighter */
+html.theme-night .ProseMirror em {
+  color: #a0a8c0;
+  font-style: italic;
+}
+
+/* Night Theme - Links - Muted blue accent */
 html.theme-night .ProseMirror a {
-  color: #58a6ff;
+  color: #5d7cbf;
   text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
 }
 
 html.theme-night .ProseMirror a:hover {
-  text-decoration: underline;
+  border-bottom-color: #5d7cbf;
 }
 
-/* Night Theme - Blockquotes - Clean left border only like Typora */
+/* Night Theme - Blockquotes - Subtle left border */
 html.theme-night .ProseMirror blockquote {
-  border-left: 4px solid #5a5a5a !important;
-  padding: 0 0 0 1em !important;
-  margin: 0.8em 0 !important;
-  background: transparent !important;
-  color: #b8b8b8 !important;
-  border-radius: 0 !important;
+  border-left: 3px solid #3a4560 !important;
+  padding: 0.5em 0 0.5em 1.2em !important;
+  margin: 1.2em 0 !important;
+  background: rgba(50, 60, 80, 0.2) !important;
+  color: #707890 !important;
+  border-radius: 0 4px 4px 0 !important;
+  font-style: italic;
 }
 
-/* Night Theme - Code blocks */
+/* Night Theme - Code blocks with subtle background */
 .theme-night .ProseMirror pre {
-  background: transparent !important;
-  border: none !important;
+  background: #171922 !important;
+  border: 1px solid #1e2230 !important;
+  border-radius: 8px !important;
+  padding: 1em !important;
 }
 
 .theme-night .ProseMirror pre code {
-  color: #c9d1d9;
-  font-family: "SF Mono", "Fira Code", Consolas, monospace;
+  color: #8891ab;
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
   font-size: 0.9em;
+  background: transparent !important;
 }
 
-/* Night Theme - Inline Code */
+/* Night Theme - Inline Code - Muted cyan */
 .theme-night .ProseMirror code {
-  background: rgba(110, 118, 129, 0.4);
-  color: #e6edf3;
-  padding: 0.2em 0.4em;
-  border-radius: 6px;
-  font-family: "SF Mono", "Fira Code", Consolas, monospace;
-  font-size: 0.85em;
+  background: rgba(60, 80, 100, 0.3);
+  color: #5a9aaa;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.88em;
 }
 
-/* Night Theme - Syntax Highlighting Colors - Vibrant Dracula */
+/* Night Theme - Syntax Highlighting - Muted Stoic Colors */
 .theme-night .hljs-keyword,
-.theme-night .hljs-selector-tag,
-.theme-dracula .hljs-keyword,
-.theme-dracula .hljs-selector-tag {
-  color: #ff79c6;
-  /* Pink */
+.theme-night .hljs-selector-tag {
+  color: #8878a8;
   font-weight: 500;
 }
 
-.theme-night .hljs-tag,
-.theme-dracula .hljs-tag {
-  color: #8be9fd;
-  /* Cyan */
+.theme-night .hljs-tag {
+  color: #5a9aaa;
 }
 
 .theme-night .hljs-attr,
-.theme-night .hljs-attribute,
-.theme-dracula .hljs-attr {
-  color: #50fa7b;
-  /* Green */
+.theme-night .hljs-attribute {
+  color: #5d7cbf;
 }
 
 .theme-night .hljs-string,
-.theme-night .hljs-doctag,
-.theme-dracula .hljs-string {
-  color: #f1fa8c;
-  /* Yellow */
+.theme-night .hljs-doctag {
+  color: #6a9a52;
 }
 
-.theme-night .hljs-comment,
-.theme-dracula .hljs-comment {
-  color: #6272a4;
-  /* Gray Blue */
+.theme-night .hljs-comment {
+  color: #454d66;
   font-style: italic;
 }
 
 .theme-night .hljs-title,
-.theme-night .hljs-function .hljs-title,
-.theme-dracula .hljs-title {
-  color: #50fa7b;
-  /* Green for functions/titles */
+.theme-night .hljs-function .hljs-title {
+  color: #5d7cbf;
 }
 
-.theme-night .hljs-number,
-.theme-dracula .hljs-number {
-  color: #bd93f9;
-  /* Purple */
+.theme-night .hljs-number {
+  color: #b08050;
 }
 
 .theme-night .hljs-variable,
-.theme-night .hljs-template-variable,
-.theme-dracula .hljs-variable {
-  color: #f8f8f2;
-  /* White/FG */
+.theme-night .hljs-template-variable {
+  color: #9098b8;
 }
 
 .theme-night .hljs-built_in,
-.theme-night .hljs-type,
-.theme-dracula .hljs-built_in {
-  color: #8be9fd;
-  /* Cyan */
+.theme-night .hljs-type {
+  color: #5090a0;
   font-style: italic;
 }
 
 .theme-night .hljs-literal,
-.theme-night .hljs-boolean,
+.theme-night .hljs-boolean {
+  color: #b08050;
+}
+
+.theme-night .hljs-params {
+  color: #a08050;
+}
+
+.theme-night .hljs-symbol {
+  color: #a06070;
+}
+
+/* Dracula Theme Syntax - Keep separate */
+.theme-dracula .hljs-keyword,
+.theme-dracula .hljs-selector-tag {
+  color: #ff79c6;
+  font-weight: 500;
+}
+
+.theme-dracula .hljs-tag {
+  color: #8be9fd;
+}
+
+.theme-dracula .hljs-attr {
+  color: #50fa7b;
+}
+
+.theme-dracula .hljs-string {
+  color: #f1fa8c;
+}
+
+.theme-dracula .hljs-comment {
+  color: #6272a4;
+  font-style: italic;
+}
+
+.theme-dracula .hljs-title {
+  color: #50fa7b;
+}
+
+.theme-dracula .hljs-number {
+  color: #bd93f9;
+}
+
+.theme-dracula .hljs-variable {
+  color: #f8f8f2;
+}
+
+.theme-dracula .hljs-built_in {
+  color: #8be9fd;
+  font-style: italic;
+}
+
 .theme-dracula .hljs-literal {
   color: #bd93f9;
-  /* Purple */
 }
 
-.theme-night .hljs-params,
 .theme-dracula .hljs-params {
   color: #ffb86c;
-  /* Orange */
 }
 
-.theme-night .hljs-symbol,
 .theme-dracula .hljs-symbol {
   color: #ff79c6;
-  /* Pink */
 }
 
-/* Night Theme - Tables */
+/* Night Theme - Tables - Subtle styling */
 .theme-night .ProseMirror th,
 .theme-night .ProseMirror td {
-  border-color: var(--blockquote-border-color);
+  border-color: #1e2230;
 }
 
 .theme-night .ProseMirror th {
-  background-color: var(--side-bar-bg-color);
+  background-color: #171922;
+  color: #5d7cbf;
+  font-weight: 600;
 }
 
-/* Night Theme - HR */
+.theme-night .ProseMirror td {
+  background-color: transparent;
+}
+
+.theme-night .ProseMirror tr:hover td {
+  background-color: rgba(50, 60, 80, 0.15);
+}
+
+/* Night Theme - HR - Subtle gradient */
 .theme-night .ProseMirror hr {
-  background-color: var(--blockquote-border-color);
+  background: linear-gradient(90deg, #5d7cbf, #8878a8, #5a9aaa);
   border: none;
-  height: 2px;
+  height: 1px;
+  opacity: 0.3;
+  margin: 2em 0;
+}
+
+/* Night Theme - Task Lists */
+.theme-night .ProseMirror input[type="checkbox"] {
+  accent-color: #5d7cbf;
+}
+
+/* Night Theme - Highlight */
+.theme-night .ProseMirror mark {
+  background-color: rgba(160, 120, 70, 0.25);
+  color: #c8a060;
+  padding: 0.1em 0.2em;
+  border-radius: 2px;
 }
 
 /* Night Theme - Selection */
 .theme-night ::selection {
-  background: var(--selection-bg-color);
-  color: #fff;
+  background: #283050;
+  color: #c0c8d8;
   text-shadow: none;
 }
 
@@ -976,6 +1116,7 @@ html.theme-night .ProseMirror blockquote {
 .theme-monokai .ProseMirror h1 {
   font-size: 2em;
   color: #f92672;
+  text-align: center;
 }
 
 .theme-monokai .ProseMirror h2 {
@@ -1130,18 +1271,24 @@ html.theme-monokai .ProseMirror blockquote {
 .theme-solarizedDark .ProseMirror h1 {
   font-size: 1.8em;
   color: #b58900;
-  border-bottom: 2px solid #073642;
+  border-bottom: 2px solid #586e75;
   padding-bottom: 0.2em;
 }
 
 .theme-solarizedDark .ProseMirror h2 {
   font-size: 1.5em;
   color: #cb4b16;
+  border-bottom: 1px solid #073642;
+  padding-bottom: 0.15em;
 }
 
 .theme-solarizedDark .ProseMirror h3 {
   font-size: 1.3em;
   color: #dc322f;
+  display: inline-block;
+  border-bottom: 1px solid #073642;
+  padding-bottom: 0.1em;
+  padding-right: 2em;
 }
 
 .theme-solarizedDark .ProseMirror h4 {
@@ -1260,18 +1407,24 @@ html.theme-solarizedDark .ProseMirror blockquote {
 .theme-solarizedLight .ProseMirror h1 {
   font-size: 1.8em;
   color: #b58900;
-  border-bottom: 2px solid #eee8d5;
+  border-bottom: 2px solid #93a1a1;
   padding-bottom: 0.2em;
 }
 
 .theme-solarizedLight .ProseMirror h2 {
   font-size: 1.5em;
   color: #cb4b16;
+  border-bottom: 1px solid #eee8d5;
+  padding-bottom: 0.15em;
 }
 
 .theme-solarizedLight .ProseMirror h3 {
   font-size: 1.3em;
   color: #dc322f;
+  display: inline-block;
+  border-bottom: 1px solid #eee8d5;
+  padding-bottom: 0.1em;
+  padding-right: 2em;
 }
 
 .theme-solarizedLight .ProseMirror h4 {

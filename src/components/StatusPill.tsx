@@ -39,7 +39,7 @@ const StatusPill: React.FC<StatusPillProps> = ({
         className="px-2 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-mono text-xs font-bold"
         title="Toggle source mode"
       >
-        ⌘⇧U
+        ⌘/
       </button>
       <span style={{ color: 'var(--window-border)' }}>|</span>
       <span className="opacity-70">{wordCount} words</span>
