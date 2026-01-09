@@ -511,6 +511,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
       attributes: {
         id: 'write',
         class: 'focus:outline-none min-h-screen',
+        spellcheck: 'false',
+        autocorrect: 'off',
+        autocapitalize: 'off',
       },
       handleDrop: handleDrop as any,
       handleClick: (view, pos, event) => {
@@ -716,10 +719,301 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
 
 
 
+  // Handle keyboard shortcuts directly
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editor || viewMode !== 'preview') return;
+
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const cmdKey = isMac ? e.metaKey : e.ctrlKey;
+
+      // Helper to get word boundaries at cursor position
+      const getWordAtCursor = (): { from: number; to: number } | null => {
+        const { from, to } = editor.state.selection;
+        if (from !== to) return null; // Already has selection
+
+        const $pos = editor.state.doc.resolve(from);
+        const start = $pos.start();
+        const text = $pos.parent.textContent;
+        const offsetInNode = from - start;
+
+        // Find word boundaries
+        let wordStart = offsetInNode;
+        let wordEnd = offsetInNode;
+
+        // Go backwards to find start of word
+        while (wordStart > 0 && /\w/.test(text[wordStart - 1])) {
+          wordStart--;
+        }
+
+        // Go forwards to find end of word
+        while (wordEnd < text.length && /\w/.test(text[wordEnd])) {
+          wordEnd++;
+        }
+
+        if (wordStart !== wordEnd) {
+          return { from: start + wordStart, to: start + wordEnd };
+        }
+        return null;
+      };
+
+      if (cmdKey && !e.shiftKey && !e.altKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            const wordRangeB = getWordAtCursor();
+            if (wordRangeB) {
+              editor.chain().focus().setTextSelection(wordRangeB).toggleBold().run();
+            } else {
+              editor.chain().focus().toggleBold().run();
+            }
+            break;
+          case 'i':
+            e.preventDefault();
+            const wordRangeI = getWordAtCursor();
+            if (wordRangeI) {
+              editor.chain().focus().setTextSelection(wordRangeI).toggleItalic().run();
+            } else {
+              editor.chain().focus().toggleItalic().run();
+            }
+            break;
+          case 'u':
+            e.preventDefault();
+            const wordRangeU = getWordAtCursor();
+            if (wordRangeU) {
+              editor.chain().focus().setTextSelection(wordRangeU).toggleUnderline().run();
+            } else {
+              editor.chain().focus().toggleUnderline().run();
+            }
+            break;
+          case 'k':
+            e.preventDefault();
+            const url = prompt('Enter URL:');
+            if (url) {
+              editor.chain().focus().setLink({ href: url }).run();
+            }
+            break;
+          case '1':
+            e.preventDefault();
+            editor.chain().focus().toggleHeading({ level: 1 }).run();
+            break;
+          case '2':
+            e.preventDefault();
+            editor.chain().focus().toggleHeading({ level: 2 }).run();
+            break;
+          case '3':
+            e.preventDefault();
+            editor.chain().focus().toggleHeading({ level: 3 }).run();
+            break;
+          case '4':
+            e.preventDefault();
+            editor.chain().focus().toggleHeading({ level: 4 }).run();
+            break;
+          case '5':
+            e.preventDefault();
+            editor.chain().focus().toggleHeading({ level: 5 }).run();
+            break;
+          case '6':
+            e.preventDefault();
+            editor.chain().focus().toggleHeading({ level: 6 }).run();
+            break;
+          case '0':
+            e.preventDefault();
+            editor.chain().focus().setParagraph().run();
+            break;
+        }
+      }
+
+      // Cmd + / - for header level (increase/decrease)
+      if (cmdKey && !e.shiftKey && !e.altKey) {
+        if (e.key === '=' || e.key === '+') {
+          e.preventDefault();
+          // Increase heading level (H6 -> H5 -> ... -> H1)
+          const { $from } = editor.state.selection;
+          const node = $from.parent;
+          if (node.type.name === 'heading') {
+            const currentLevel = node.attrs.level;
+            if (currentLevel > 1) {
+              editor.chain().focus().setHeading({ level: (currentLevel - 1) as 1|2|3|4|5|6 }).run();
+            }
+          } else {
+            editor.chain().focus().setHeading({ level: 6 }).run();
+          }
+        } else if (e.key === '-' || e.key === '_') {
+          e.preventDefault();
+          // Decrease heading level (H1 -> H2 -> ... -> H6 -> paragraph)
+          const { $from } = editor.state.selection;
+          const node = $from.parent;
+          if (node.type.name === 'heading') {
+            const currentLevel = node.attrs.level;
+            if (currentLevel < 6) {
+              editor.chain().focus().setHeading({ level: (currentLevel + 1) as 1|2|3|4|5|6 }).run();
+            } else {
+              editor.chain().focus().setParagraph().run();
+            }
+          }
+        }
+      }
+
+      // Cmd+Shift combinations
+      if (cmdKey && e.shiftKey && !e.altKey) {
+        switch (e.key.toLowerCase()) {
+          case 'h':
+            e.preventDefault();
+            editor.chain().focus().toggleHighlight().run();
+            break;
+          case 'k':
+            e.preventDefault();
+            editor.chain().focus().toggleCodeBlock().run();
+            break;
+          case 'q':
+            e.preventDefault();
+            editor.chain().focus().toggleBlockquote().run();
+            break;
+          case 'x':
+            e.preventDefault();
+            editor.chain().focus().toggleTaskList().run();
+            break;
+          case 'm':
+            e.preventDefault();
+            editor.chain().focus().insertContent({ type: 'math', attrs: { latex: '' } }).run();
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editor, viewMode]);
+
   useEffect(() => {
     const removeListener = window.electron.on('menu-action', (_: any, action: string) => {
       if (action === 'toggle-source-mode') {
         toggleMode();
+      }
+      // Handle formatting actions
+      if (editor && viewMode === 'preview') {
+        switch (action) {
+          case 'format-bold':
+            editor.chain().focus().toggleBold().run();
+            break;
+          case 'format-italic':
+            editor.chain().focus().toggleItalic().run();
+            break;
+          case 'format-underline':
+            editor.chain().focus().toggleUnderline().run();
+            break;
+          case 'format-strike':
+            editor.chain().focus().toggleStrike().run();
+            break;
+          case 'format-highlight':
+            editor.chain().focus().toggleHighlight().run();
+            break;
+          case 'format-code':
+            editor.chain().focus().toggleCode().run();
+            break;
+          case 'heading-1':
+            editor.chain().focus().toggleHeading({ level: 1 }).run();
+            break;
+          case 'heading-2':
+            editor.chain().focus().toggleHeading({ level: 2 }).run();
+            break;
+          case 'heading-3':
+            editor.chain().focus().toggleHeading({ level: 3 }).run();
+            break;
+          case 'heading-4':
+            editor.chain().focus().toggleHeading({ level: 4 }).run();
+            break;
+          case 'heading-5':
+            editor.chain().focus().toggleHeading({ level: 5 }).run();
+            break;
+          case 'heading-6':
+            editor.chain().focus().toggleHeading({ level: 6 }).run();
+            break;
+          case 'paragraph':
+            editor.chain().focus().setParagraph().run();
+            break;
+          case 'blockquote':
+            editor.chain().focus().toggleBlockquote().run();
+            break;
+          case 'ordered-list':
+            editor.chain().focus().toggleOrderedList().run();
+            break;
+          case 'bullet-list':
+            editor.chain().focus().toggleBulletList().run();
+            break;
+          case 'task-list':
+            editor.chain().focus().toggleTaskList().run();
+            break;
+          case 'horizontal-rule':
+            editor.chain().focus().setHorizontalRule().run();
+            break;
+          case 'code-block':
+            editor.chain().focus().toggleCodeBlock().run();
+            break;
+          case 'insert-link':
+            {
+              const url = prompt('Enter URL:');
+              if (url) {
+                editor.chain().focus().setLink({ href: url }).run();
+              }
+            }
+            break;
+          case 'insert-image':
+            {
+              const imageUrl = prompt('Enter image URL:');
+              if (imageUrl) {
+                editor.chain().focus().setImage({ src: imageUrl }).run();
+              }
+            }
+            break;
+          case 'clear-format':
+            editor.chain().focus().unsetAllMarks().run();
+            break;
+          case 'math-block':
+            editor.chain().focus().insertContent({ type: 'math', attrs: { latex: '' } }).run();
+            break;
+          case 'format-inline-math':
+            editor.chain().focus().insertContent({ type: 'inlineMath', attrs: { latex: '' } }).run();
+            break;
+          case 'increase-heading':
+            {
+              const { $from } = editor.state.selection;
+              const node = $from.parent;
+              if (node.type.name === 'heading') {
+                const currentLevel = node.attrs.level as number;
+                if (currentLevel > 1) {
+                  editor.chain().focus().setHeading({ level: (currentLevel - 1) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
+                }
+              } else {
+                editor.chain().focus().setHeading({ level: 6 }).run();
+              }
+            }
+            break;
+          case 'decrease-heading':
+            {
+              const { $from } = editor.state.selection;
+              const node = $from.parent;
+              if (node.type.name === 'heading') {
+                const currentLevel = node.attrs.level as number;
+                if (currentLevel < 6) {
+                  editor.chain().focus().setHeading({ level: (currentLevel + 1) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
+                } else {
+                  editor.chain().focus().setParagraph().run();
+                }
+              }
+            }
+            break;
+          case 'paste-plain-text':
+            {
+              navigator.clipboard.readText().then((text) => {
+                if (text) {
+                  editor.chain().focus().insertContent(text).run();
+                }
+              });
+            }
+            break;
+        }
       }
     });
     return () => removeListener?.();

@@ -20,6 +20,8 @@ interface Window {
     showInFolder: (path: string) => Promise<{ success: boolean; error?: string }>;
     exportPdf: () => Promise<{ success: boolean; path?: string; error?: string }>;
     exportHtml: (html: string) => Promise<{ success: boolean; path?: string; error?: string }>;
+    resetZoom: () => Promise<{ success: boolean }>;
+    setNativeTheme: (theme: 'dark' | 'light' | 'system') => Promise<{ success: boolean }>;
     invoke: (channel: string, ...args: any[]) => Promise<any>;
   }
 }

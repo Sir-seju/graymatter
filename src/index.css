@@ -70,6 +70,19 @@ body {
   color: var(--text-color);
 }
 
+/* Disable spelling underlines globally */
+.ProseMirror * {
+  -webkit-text-decoration-skip: none;
+  text-decoration-skip-ink: none;
+}
+
+.ProseMirror [data-spelling-error],
+.ProseMirror .spelling-error,
+.ProseMirror ::spelling-error {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
 /* Code blocks - font and syntax base */
 pre.hljs,
 pre code,
@@ -150,7 +163,7 @@ pre code,
 
 /* Source Mode Syntax Highlighting */
 /* Ensure highlight layer content matches textarea exactly */
-.source-mode-container [aria-hidden="true"] > div {
+.source-mode-container [aria-hidden="true"]>div {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -353,13 +366,14 @@ pre code,
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
-  padding: 40px 60px 100px 60px;
+  padding: 80px 60px 100px 60px;
   min-height: 100vh;
   box-sizing: border-box;
-  line-height: 1.7;
-  font-size: 17px;
+  line-height: 1.6;
+  font-size: 16px;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  letter-spacing: -0.01em;
 }
 
 /* Smooth caret */
@@ -458,16 +472,17 @@ pre code,
 }
 
 /* First heading after nothing - reduce top margin */
-.ProseMirror > h1:first-child,
-.ProseMirror > h2:first-child,
-.ProseMirror > h3:first-child {
+.ProseMirror>h1:first-child,
+.ProseMirror>h2:first-child,
+.ProseMirror>h3:first-child {
   margin-top: 0;
 }
 
 /* Paragraphs */
 .ProseMirror p {
-  margin-bottom: 1em;
-  line-height: 1.7;
+  margin-bottom: 0.8em;
+  margin-top: 0;
+  line-height: 1.6;
 }
 
 /* Lists */
@@ -495,22 +510,22 @@ pre code,
   line-height: 1.6;
 }
 
-.ProseMirror li > p {
+.ProseMirror li>p {
   margin-bottom: 0.25em;
 }
 
 /* Reduce top margin when heading follows paragraph */
-.ProseMirror p + h1,
-.ProseMirror p + h2,
-.ProseMirror p + h3,
-.ProseMirror p + h4 {
+.ProseMirror p+h1,
+.ProseMirror p+h2,
+.ProseMirror p+h3,
+.ProseMirror p+h4 {
   margin-top: 1.5em;
 }
 
 /* Reduce margin between consecutive headings */
-.ProseMirror h1 + h2,
-.ProseMirror h2 + h3,
-.ProseMirror h3 + h4 {
+.ProseMirror h1+h2,
+.ProseMirror h2+h3,
+.ProseMirror h3+h4 {
   margin-top: 0.5em;
 }
 
@@ -651,18 +666,18 @@ pre code,
    ============================================ */
 
 .theme-night {
-  --bg-color: #191919;
-  --text-color: #c9d1d9;
-  --side-bar-bg-color: #0d1117;
-  --window-border: #30363d;
-  --active-file-bg-color: #161b22;
-  --active-file-text-color: #ffffff;
-  --item-hover-bg-color: #21262d;
-  --control-text-color: #8b949e;
+  --bg-color: #232323;
+  --text-color: #b8b8b8;
+  --side-bar-bg-color: #1e1e1e;
+  --window-border: #333333;
+  --active-file-bg-color: #2a2a2a;
+  --active-file-text-color: #d0d0d0;
+  --item-hover-bg-color: #2f2f2f;
+  --control-text-color: #707070;
   --primary-color: #58a6ff;
-  --heading-color: #ffffff;
-  --code-block-bg: #0d1117;
-  --blockquote-border-color: #3b82f6;
+  --heading-color: #d4d4d4;
+  --code-block-bg: #1a1a1a;
+  --blockquote-border-color: #404040;
   --selection-bg-color: #264f78;
 }
 
@@ -672,17 +687,19 @@ pre code,
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
-  line-height: 1.7;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
-/* Night Theme - Headings - Clean white, strong contrast */
+/* Night Theme - Headings - Elegant, clean like Typora */
 .theme-night .ProseMirror h1,
 .theme-night .ProseMirror h2,
 .theme-night .ProseMirror h3,
 .theme-night .ProseMirror h4,
 .theme-night .ProseMirror h5,
 .theme-night .ProseMirror h6 {
-  color: var(--heading-color);
+  color: #c8c8c8;
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -690,41 +707,68 @@ pre code,
 }
 
 .theme-night .ProseMirror h1 {
-  font-size: 2em;
-  font-weight: 700;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid #30363d;
+  font-size: 2.5em;
+  font-weight: 450;
 }
 
 .theme-night .ProseMirror h2 {
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: 600;
-  padding-bottom: 0.25em;
-  border-bottom: 1px solid #21262d;
 }
 
 .theme-night .ProseMirror h3 {
-  font-size: 1.25em;
+  font-size: 1.2em;
+  font-weight: 600;
 }
 
 .theme-night .ProseMirror h4 {
   font-size: 1.1em;
+  font-weight: 600;
 }
 
 .theme-night .ProseMirror h5 {
   font-size: 1em;
-  color: #8b949e;
+  font-weight: 600;
+  color: #b0b0b0;
 }
 
 .theme-night .ProseMirror h6 {
-  font-size: 0.9em;
-  color: #6e7681;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #909090;
 }
 
-/* Night Theme - Strong/Bold */
-html.theme-night .ProseMirror strong {
-  color: #ffffff !important;
-  font-weight: 600 !important;
+/* Night Theme - Paragraphs - Consistent spacing */
+.theme-night .ProseMirror p {
+  margin-bottom: 0.8em;
+  margin-top: 0;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Night Theme - All content lighter weight */
+.theme-night .ProseMirror {
+  font-weight: 300;
+}
+
+/* Night Theme - Lists - Square bullets like Typora */
+.theme-night .ProseMirror ul {
+  list-style-type: square;
+}
+
+.theme-night .ProseMirror ul ul {
+  list-style-type: square;
+}
+
+.theme-night .ProseMirror ul ul ul {
+  list-style-type: square;
+}
+
+/* Night Theme - Strong/Bold - Brighter for emphasis */
+html.theme-night .ProseMirror strong,
+html.theme-night .ProseMirror b {
+  color: #f0f0f0 !important;
+  font-weight: 650 !important;
 }
 
 /* Night Theme - Links - Blue accent */
@@ -737,13 +781,13 @@ html.theme-night .ProseMirror a:hover {
   text-decoration: underline;
 }
 
-/* Night Theme - Blockquotes - Blue accent bar */
+/* Night Theme - Blockquotes - Clean left border only like Typora */
 html.theme-night .ProseMirror blockquote {
-  border-left: 4px solid #3b82f6 !important;
-  padding: 0.5em 1em !important;
-  margin: 1em 0 !important;
-  background: rgba(59, 130, 246, 0.1) !important;
-  color: #8b949e !important;
+  border-left: 4px solid #5a5a5a !important;
+  padding: 0 0 0 1em !important;
+  margin: 0.8em 0 !important;
+  background: transparent !important;
+  color: #b8b8b8 !important;
   border-radius: 0 !important;
 }
 
@@ -910,9 +954,10 @@ html.theme-night .ProseMirror blockquote {
 .theme-monokai body {
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: "Consolas", "Monaco", "Lucida Console", monospace;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
 /* Monokai - Headings - VIBRANT COLORS, no borders */
@@ -922,17 +967,15 @@ html.theme-night .ProseMirror blockquote {
 .theme-monokai .ProseMirror h4,
 .theme-monokai .ProseMirror h5,
 .theme-monokai .ProseMirror h6 {
-  font-family: "Consolas", "Monaco", monospace;
-  font-weight: normal;
+  font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .theme-monokai .ProseMirror h1 {
-  font-size: 2.2em;
+  font-size: 2em;
   color: #f92672;
-  text-align: center;
 }
 
 .theme-monokai .ProseMirror h2 {
@@ -960,10 +1003,17 @@ html.theme-night .ProseMirror blockquote {
   color: #e6db74;
 }
 
+/* Monokai - Paragraphs */
+.theme-monokai .ProseMirror p {
+  margin-bottom: 0.8em;
+  margin-top: 0;
+  line-height: 1.6;
+}
+
 /* Monokai - Strong/Bold - Pink */
 html.theme-monokai .ProseMirror strong {
   color: #f92672 !important;
-  font-weight: bold !important;
+  font-weight: 600 !important;
 }
 
 /* Monokai - Italic - Cyan */
@@ -1004,9 +1054,9 @@ html.theme-monokai .ProseMirror blockquote {
   background: #3e3d32;
   color: #f92672;
   padding: 0.15em 0.4em;
-  border-radius: 3px;
-  font-family: inherit;
-  font-size: 0.9em;
+  border-radius: 4px;
+  font-family: "SF Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.85em;
 }
 
 .theme-monokai .ProseMirror pre code {

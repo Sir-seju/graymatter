@@ -57,6 +57,11 @@ function App() {
   // Stats State
   const [stats, setStats] = useState({ words: 0, characters: 0, blockType: 'paragraph' });
 
+  // Zoom State
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
+  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Handle sidebar width change
   const handleSidebarWidthChange = (newWidth: number) => {
     setSidebarWidth(newWidth);
@@ -358,6 +363,10 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
     setTheme(themeName);
     localStorage.setItem(STORAGE_KEYS.theme, themeName);
     applyTheme(themeName);
+
+    // Set native theme for system UI (dictionary popup, etc.)
+    const isLightTheme = themeName === 'solarizedLight';
+    window.electron.setNativeTheme(isLightTheme ? 'light' : 'dark');
   };
 
   // Save fontSize to localStorage when it changes
@@ -375,6 +384,34 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
   // Apply initial theme on mount
   useEffect(() => {
     applyTheme(theme);
+    // Set native theme for system UI
+    const isLightTheme = theme === 'solarizedLight';
+    window.electron.setNativeTheme(isLightTheme ? 'light' : 'dark');
+  }, []);
+
+  // Listen for zoom changes
+  useEffect(() => {
+    const removeListener = window.electron.on('zoom-changed', (_: any, percentage: number) => {
+      setZoomLevel(percentage);
+      setShowZoomIndicator(true);
+
+      // Clear existing timeout
+      if (zoomTimeoutRef.current) {
+        clearTimeout(zoomTimeoutRef.current);
+      }
+
+      // Always hide indicator after 3 seconds
+      zoomTimeoutRef.current = setTimeout(() => {
+        setShowZoomIndicator(false);
+      }, 3000);
+    });
+
+    return () => {
+      removeListener();
+      if (zoomTimeoutRef.current) {
+        clearTimeout(zoomTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Listen for external file changes and reload content
@@ -455,6 +492,43 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
           onThemeClick={cycleTheme}
           onSourceClick={() => editorRef.current?.toggleSourceMode()}
         />
+
+        {/* Zoom Indicator */}
+        <div
+          className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-sm transition-all duration-300 ease-out ${
+            showZoomIndicator
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+          }`}
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--side-bar-bg-color) 85%, transparent)',
+            border: '1px solid var(--window-border)',
+            color: 'var(--text-color)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+              <path d="M11 8v6"/>
+              <path d="M8 11h6"/>
+            </svg>
+            <span className="text-sm font-semibold tabular-nums" style={{ minWidth: '3ch' }}>{zoomLevel}%</span>
+          </div>
+          {zoomLevel !== 100 && (
+            <button
+              onClick={() => window.electron.resetZoom()}
+              className="text-xs px-2.5 py-1 rounded-md font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: 'var(--primary-color)',
+                color: 'white',
+              }}
+            >
+              Reset
+            </button>
+          )}
+        </div>
 
         {/* Editor Area with Tabs */}
         <div className="flex-1 flex flex-col h-full overflow-hidden" style={{ backgroundColor: 'var(--bg-color, #fff)' }}>

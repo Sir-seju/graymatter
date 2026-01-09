@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, shell, Menu, nativeTheme } from 'electron';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { join } from 'node:path';
@@ -30,6 +30,74 @@ function createWindow() {
 
   // Create Application Menu
   createApplicationMenu(win);
+
+  // Enable native macOS-style context menu (right-click)
+  win.webContents.on('context-menu', (event, params) => {
+    const hasSelection = params.selectionText.length > 0;
+    const selectedWord = params.selectionText.trim().split(/\s+/)[0] || '';
+
+    const template: any[] = [];
+
+    // Look Up and Translate - only show when there's selected text
+    if (hasSelection && process.platform === 'darwin') {
+      template.push(
+        {
+          label: `Look Up "${selectedWord.length > 20 ? selectedWord.substring(0, 20) + '...' : selectedWord}"`,
+          click: () => {
+            // Use native macOS dictionary popup
+            win?.webContents.showDefinitionForSelection();
+          }
+        },
+        {
+          label: `Translate "${selectedWord.length > 15 ? selectedWord.substring(0, 15) + '...' : selectedWord}"`,
+          click: () => {
+            // Trigger native macOS translation via keyboard shortcut simulation
+            // This uses the system translation service
+            const { exec } = require('child_process');
+            exec(`osascript -e 'tell application "System Events" to keystroke "t" using {command down, shift down}'`);
+          }
+        },
+        {
+          label: 'Search with Google',
+          click: () => {
+            shell.openExternal(`https://www.google.com/search?q=${encodeURIComponent(params.selectionText)}`);
+          }
+        },
+        { type: 'separator' }
+      );
+    }
+
+    // Edit actions
+    template.push(
+      { label: 'Cut', role: 'cut', accelerator: 'CmdOrCtrl+X', enabled: params.editFlags.canCut },
+      { label: 'Copy', role: 'copy', accelerator: 'CmdOrCtrl+C', enabled: params.editFlags.canCopy },
+      { label: 'Paste', role: 'paste', accelerator: 'CmdOrCtrl+V', enabled: params.editFlags.canPaste },
+      {
+        label: 'Paste as Plain Text',
+        accelerator: 'CmdOrCtrl+Shift+V',
+        click: () => {
+          win?.webContents.send('menu-action', 'paste-plain-text');
+        }
+      },
+      { type: 'separator' }
+    );
+
+    // macOS Services submenu
+    if (process.platform === 'darwin') {
+      template.push(
+        { role: 'services', submenu: [] },
+        { type: 'separator' }
+      );
+    }
+
+    // Select All
+    template.push(
+      { label: 'Select All', role: 'selectAll', accelerator: 'CmdOrCtrl+A' }
+    );
+
+    const contextMenu = Menu.buildFromTemplate(template);
+    contextMenu.popup();
+  });
 
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
@@ -298,6 +366,21 @@ app.whenReady().then(() => {
       console.error('Show in folder failed:', error);
       return { success: false, error: error.message };
     }
+  });
+
+  // Reset zoom to 100%
+  ipcMain.handle('reset-zoom', async () => {
+    if (win) {
+      win.webContents.setZoomLevel(0);
+      win.webContents.send('zoom-changed', 100);
+    }
+    return { success: true };
+  });
+
+  // Set native theme (affects system UI like dictionary popup)
+  ipcMain.handle('set-native-theme', async (_: unknown, theme: 'dark' | 'light' | 'system') => {
+    nativeTheme.themeSource = theme;
+    return { success: true };
   });
 })
 

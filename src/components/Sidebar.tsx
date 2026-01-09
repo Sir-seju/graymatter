@@ -157,6 +157,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
+  // Refs to track current state for use in event listeners
+  const fileTreeRef = useRef<FileNode[]>(fileTree);
+  fileTreeRef.current = fileTree;
+  const rootPathRef = useRef<string | null>(rootPath);
+  rootPathRef.current = rootPath;
+
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ file: string; line: number; content: string }>>([]);
@@ -256,13 +262,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   useEffect(() => {
-    const removeListener = window.electron.on('file-changed', () => {
-      refreshTree();
-    });
-    return () => removeListener();
-  }, [rootPath]);
-
-  useEffect(() => {
     if (rootPath) {
       window.electron.watchFolder(rootPath);
     }
@@ -321,12 +320,77 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const refreshTree = async () => {
-    if (rootPath) {
-      const nodes = await loadDirectory(rootPath);
+  // Collect all open folder paths from the current tree
+  const getOpenFolderPaths = (nodes: FileNode[]): Set<string> => {
+    const openPaths = new Set<string>();
+    const traverse = (nodeList: FileNode[]) => {
+      for (const node of nodeList) {
+        if (node.kind === 'directory' && node.isOpen) {
+          openPaths.add(node.path);
+          if (node.children) {
+            traverse(node.children);
+          }
+        }
+      }
+    };
+    traverse(nodes);
+    return openPaths;
+  };
+
+  // Recursively load directory tree, preserving open states
+  const loadTreeWithOpenStates = async (path: string, openPaths: Set<string>): Promise<FileNode[]> => {
+    const entries = await window.electron.readDir(path);
+    const nodes: FileNode[] = [];
+
+    for (const entry of entries) {
+      const nodePath = entry.path || `${path}/${entry.name}`;
+      const isDirectory = entry.isDirectory;
+      const wasOpen = openPaths.has(nodePath);
+
+      let children: FileNode[] | undefined = undefined;
+      if (isDirectory && wasOpen) {
+        // Recursively load children for previously open folders
+        children = await loadTreeWithOpenStates(nodePath, openPaths);
+      } else if (isDirectory) {
+        children = [];
+      }
+
+      nodes.push({
+        name: entry.name,
+        path: nodePath,
+        kind: isDirectory ? 'directory' : 'file',
+        children,
+        isOpen: wasOpen
+      });
+    }
+
+    // Sort: directories first, then alphabetically
+    nodes.sort((a, b) => {
+      if (a.kind === b.kind) return a.name.localeCompare(b.name);
+      return a.kind === 'directory' ? -1 : 1;
+    });
+
+    return nodes;
+  };
+
+  const refreshTree = useCallback(async () => {
+    const currentRootPath = rootPathRef.current;
+    if (currentRootPath) {
+      // Get currently open folder paths before refresh (use ref for latest state)
+      const openPaths = getOpenFolderPaths(fileTreeRef.current);
+      // Reload tree while preserving open states
+      const nodes = await loadTreeWithOpenStates(currentRootPath, openPaths);
       setFileTree(nodes);
     }
-  };
+  }, []);
+
+  // Listen for file system changes from the watcher
+  useEffect(() => {
+    const removeListener = window.electron.on('file-changed', () => {
+      refreshTree();
+    });
+    return () => removeListener();
+  }, [refreshTree]);
 
   const handleOpenFolder = async () => {
     const path = await window.electron.openFolder();
@@ -424,12 +488,29 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleCreateItem = async (name: string) => {
     const fullPath = `${newItemModal.parentPath}/${name}`;
+    const parentPath = newItemModal.parentPath;
     try {
       if (newItemModal.type === 'file') {
         await window.electron.createFile(fullPath);
       } else {
         await window.electron.createFolder(fullPath);
       }
+      // Ensure parent folder is marked as open in the ref before refresh
+      const ensureParentOpen = (nodes: FileNode[]): FileNode[] => {
+        return nodes.map(node => {
+          if (node.path === parentPath && node.kind === 'directory') {
+            return { ...node, isOpen: true };
+          }
+          if (node.children && node.children.length > 0) {
+            return { ...node, children: ensureParentOpen(node.children) };
+          }
+          return node;
+        });
+      };
+      // Update the ref directly so refreshTree sees the open state
+      fileTreeRef.current = ensureParentOpen(fileTreeRef.current);
+      // Also update state for UI consistency
+      setFileTree(fileTreeRef.current);
       refreshTree();
     } catch (err) {
       console.error(`Failed to create ${newItemModal.type}:`, err);

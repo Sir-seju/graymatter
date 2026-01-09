@@ -114,15 +114,35 @@ export function createApplicationMenu(win: BrowserWindow) {
         { label: 'Heading 4', accelerator: 'CmdOrCtrl+4', click: () => win.webContents.send('menu-action', 'heading-4') },
         { label: 'Heading 5', accelerator: 'CmdOrCtrl+5', click: () => win.webContents.send('menu-action', 'heading-5') },
         { label: 'Heading 6', accelerator: 'CmdOrCtrl+6', click: () => win.webContents.send('menu-action', 'heading-6') },
+        { type: 'separator' } as MenuItemConstructorOptions,
+        { label: 'Increase Heading Level', accelerator: 'CmdOrCtrl+Plus', click: () => win.webContents.send('menu-action', 'increase-heading') },
+        { label: 'Decrease Heading Level', accelerator: 'CmdOrCtrl+-', click: () => win.webContents.send('menu-action', 'decrease-heading') },
+        { type: 'separator' } as MenuItemConstructorOptions,
         { label: 'Paragraph', accelerator: 'CmdOrCtrl+0', click: () => win.webContents.send('menu-action', 'paragraph') },
         { type: 'separator' } as MenuItemConstructorOptions,
+        {
+          label: 'Table',
+          submenu: [
+            { label: 'Insert Table', click: () => win.webContents.send('menu-action', 'insert-table') },
+            { type: 'separator' } as MenuItemConstructorOptions,
+            { label: 'Add Row Above', click: () => win.webContents.send('menu-action', 'table-add-row-before') },
+            { label: 'Add Row Below', click: () => win.webContents.send('menu-action', 'table-add-row-after') },
+            { label: 'Delete Row', click: () => win.webContents.send('menu-action', 'table-delete-row') },
+            { type: 'separator' } as MenuItemConstructorOptions,
+            { label: 'Add Column Left', click: () => win.webContents.send('menu-action', 'table-add-col-before') },
+            { label: 'Add Column Right', click: () => win.webContents.send('menu-action', 'table-add-col-after') },
+            { label: 'Delete Column', click: () => win.webContents.send('menu-action', 'table-delete-col') },
+          ]
+        } as MenuItemConstructorOptions,
+        { label: 'Code Fences', accelerator: 'CmdOrCtrl+Shift+K', click: () => win.webContents.send('menu-action', 'code-block') },
+        { label: 'Math Block', accelerator: 'CmdOrCtrl+Shift+M', click: () => win.webContents.send('menu-action', 'math-block') },
         { label: 'Quote', accelerator: 'CmdOrCtrl+Shift+Q', click: () => win.webContents.send('menu-action', 'blockquote') },
-        { label: 'Ordered List', accelerator: 'CmdOrCtrl+Shift+O', click: () => win.webContents.send('menu-action', 'ordered-list') },
-        { label: 'Bullet List', accelerator: 'CmdOrCtrl+Shift+L', click: () => win.webContents.send('menu-action', 'bullet-list') },
+        { type: 'separator' } as MenuItemConstructorOptions,
+        { label: 'Ordered List', accelerator: 'CmdOrCtrl+Shift+[', click: () => win.webContents.send('menu-action', 'ordered-list') },
+        { label: 'Unordered List', accelerator: 'CmdOrCtrl+Shift+]', click: () => win.webContents.send('menu-action', 'bullet-list') },
         { label: 'Task List', accelerator: 'CmdOrCtrl+Shift+X', click: () => win.webContents.send('menu-action', 'task-list') },
         { type: 'separator' } as MenuItemConstructorOptions,
         { label: 'Horizontal Line', accelerator: 'CmdOrCtrl+Shift+-', click: () => win.webContents.send('menu-action', 'horizontal-rule') },
-        { label: 'Code Block', accelerator: 'CmdOrCtrl+Shift+K', click: () => win.webContents.send('menu-action', 'code-block') }
       ]
     } as MenuItemConstructorOptions,
     // { role: 'viewMenu' }
@@ -137,13 +157,41 @@ export function createApplicationMenu(win: BrowserWindow) {
         { role: 'forceReload' },
         { role: 'toggleDevTools' },
         { type: 'separator' } as MenuItemConstructorOptions,
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
+        {
+          label: 'Actual Size',
+          accelerator: 'CmdOrCtrl+Shift+0',
+          click: () => {
+            win.webContents.setZoomLevel(0);
+            win.webContents.send('zoom-changed', 100);
+          }
+        },
+        {
+          label: 'Zoom In',
+          accelerator: 'CmdOrCtrl+Shift+=',
+          click: () => {
+            const currentZoom = win.webContents.getZoomLevel();
+            const newZoom = currentZoom + 0.5;
+            win.webContents.setZoomLevel(newZoom);
+            // Convert zoom level to percentage (zoom level 0 = 100%, each level is ~25%)
+            const percentage = Math.round(100 * Math.pow(1.2, newZoom));
+            win.webContents.send('zoom-changed', percentage);
+          }
+        },
+        {
+          label: 'Zoom Out',
+          accelerator: 'CmdOrCtrl+Shift+-',
+          click: () => {
+            const currentZoom = win.webContents.getZoomLevel();
+            const newZoom = currentZoom - 0.5;
+            win.webContents.setZoomLevel(newZoom);
+            const percentage = Math.round(100 * Math.pow(1.2, newZoom));
+            win.webContents.send('zoom-changed', percentage);
+          }
+        },
         { type: 'separator' } as MenuItemConstructorOptions,
         {
           label: 'Toggle Sidebar',
-          accelerator: 'CmdOrCtrl+Shift+B',
+          accelerator: 'CmdOrCtrl+Shift+L',
           click: () => win.webContents.send('menu-action', 'toggle-sidebar')
         },
         {
@@ -151,44 +199,36 @@ export function createApplicationMenu(win: BrowserWindow) {
           accelerator: 'CmdOrCtrl+/',
           click: () => win.webContents.send('menu-action', 'toggle-source-mode')
         },
+        {
+          label: 'Focus Mode',
+          accelerator: 'CmdOrCtrl+Shift+F',
+          click: () => win.webContents.send('menu-action', 'toggle-focus-mode')
+        },
+        { type: 'separator' } as MenuItemConstructorOptions,
         { role: 'togglefullscreen' }
       ]
     } as MenuItemConstructorOptions,
-    // Format menu
+    // Format menu (like Typora)
     {
       label: 'Format',
       submenu: [
-        {
-          label: 'Bold',
-          accelerator: 'CmdOrCtrl+B',
-          click: () => win.webContents.send('menu-action', 'format-bold')
-        },
-        {
-          label: 'Italic',
-          accelerator: 'CmdOrCtrl+I',
-          click: () => win.webContents.send('menu-action', 'format-italic')
-        },
-        {
-          label: 'Underline',
-          accelerator: 'CmdOrCtrl+U',
-          click: () => win.webContents.send('menu-action', 'format-underline')
-        },
-        {
-          label: 'Strikethrough',
-          accelerator: 'CmdOrCtrl+Shift+S',
-          click: () => win.webContents.send('menu-action', 'format-strike')
-        },
+        { label: 'Strong', accelerator: 'CmdOrCtrl+B', click: () => win.webContents.send('menu-action', 'format-bold') },
+        { label: 'Emphasis', accelerator: 'CmdOrCtrl+I', click: () => win.webContents.send('menu-action', 'format-italic') },
+        { label: 'Underline', accelerator: 'CmdOrCtrl+U', click: () => win.webContents.send('menu-action', 'format-underline') },
+        { label: 'Code', accelerator: 'CmdOrCtrl+Shift+`', click: () => win.webContents.send('menu-action', 'format-code') },
         { type: 'separator' } as MenuItemConstructorOptions,
-        {
-          label: 'Highlight',
-          accelerator: 'CmdOrCtrl+Shift+H',
-          click: () => win.webContents.send('menu-action', 'format-highlight')
-        },
-        {
-          label: 'Inline Code',
-          accelerator: 'CmdOrCtrl+`',
-          click: () => win.webContents.send('menu-action', 'format-code')
-        }
+        { label: 'Inline Math', click: () => win.webContents.send('menu-action', 'format-inline-math') },
+        { label: 'Strike', click: () => win.webContents.send('menu-action', 'format-strike') },
+        { label: 'Comment', click: () => win.webContents.send('menu-action', 'format-comment') },
+        { type: 'separator' } as MenuItemConstructorOptions,
+        { label: 'Hyperlink', accelerator: 'CmdOrCtrl+K', click: () => win.webContents.send('menu-action', 'insert-link') },
+        { label: 'Image', accelerator: 'CmdOrCtrl+Ctrl+I', click: () => win.webContents.send('menu-action', 'insert-image') },
+        { type: 'separator' } as MenuItemConstructorOptions,
+        { label: 'Highlight', accelerator: 'CmdOrCtrl+Shift+H', click: () => win.webContents.send('menu-action', 'format-highlight') },
+        { label: 'Superscript', click: () => win.webContents.send('menu-action', 'format-superscript') },
+        { label: 'Subscript', click: () => win.webContents.send('menu-action', 'format-subscript') },
+        { type: 'separator' } as MenuItemConstructorOptions,
+        { label: 'Clear Format', accelerator: 'CmdOrCtrl+\\', click: () => win.webContents.send('menu-action', 'clear-format') },
       ]
     } as MenuItemConstructorOptions,
     // { role: 'windowMenu' }

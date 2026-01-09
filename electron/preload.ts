@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('electron', {
   exportHtml: (html: string) => ipcRenderer.invoke('export-html', html),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   showInFolder: (path: string) => ipcRenderer.invoke('show-in-folder', path),
+  resetZoom: () => ipcRenderer.invoke('reset-zoom'),
+  setNativeTheme: (theme: 'dark' | 'light' | 'system') => ipcRenderer.invoke('set-native-theme', theme),
   invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
   on: (channel: string, callback: Function) => {
     const listener = (event: any, ...args: any[]) => callback(event, ...args);
