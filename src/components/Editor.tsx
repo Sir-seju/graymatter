@@ -517,6 +517,16 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
         transformCopiedText: true,
         bulletListMarker: '-',
         extensions: [
+          // Disable indented code blocks (4-space indent should NOT create code blocks)
+          {
+            name: 'disableIndentedCodeBlock',
+            parse: {
+              setup(md: any) {
+                // Disable the 'code' rule which handles indented code blocks
+                md.block.ruler.disable('code');
+              }
+            }
+          },
           // Serializers: Tiptap Nodes -> Markdown
           {
             name: 'math',
@@ -564,10 +574,10 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
         return false;
       },
       handleKeyDown: (view, event) => {
-        const TAB_SIZE = 4; // Standard tab size
-        const TAB_CHARS = '    '; // 4 spaces
+        const TAB_SIZE = 8; // Tab size (8 spaces)
+        const TAB_CHARS = '        '; // 8 spaces
 
-        // Handle Tab key - insert tab (4 spaces)
+        // Handle Tab key - insert tab (8 spaces)
         if (event.key === 'Tab' && !event.shiftKey) {
           event.preventDefault();
           const { state, dispatch } = view;
@@ -592,7 +602,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
               const trailingSpaces = textBefore.match(/( +)$/);
               if (trailingSpaces) {
                 const spacesCount = trailingSpaces[1].length;
-                // Delete to the previous tab stop
+                // Delete to the previous tab stop (8 spaces)
                 const deleteCount = spacesCount % TAB_SIZE === 0 ? TAB_SIZE : spacesCount % TAB_SIZE;
 
                 if (spacesCount >= deleteCount) {
