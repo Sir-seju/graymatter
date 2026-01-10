@@ -4,6 +4,7 @@ interface Window {
   electron: {
     readFile: (path: string) => Promise<string>;
     writeFile: (path: string, content: string) => Promise<void>;
+    fileExists: (path: string) => Promise<boolean>;
     renamePath: (oldPath: string, newPath: string) => Promise<{ success: boolean; error?: string }>;
     deletePath: (path: string) => Promise<{ success: boolean; error?: string }>;
     createFile: (path: string) => Promise<{ success: boolean; error?: string }>;

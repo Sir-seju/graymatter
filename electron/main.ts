@@ -136,6 +136,16 @@ app.whenReady().then(() => {
     return fs.writeFile(filePath, content, 'utf-8')
   })
 
+  // Check if file exists
+  ipcMain.handle('file-exists', async (_: unknown, filePath: string) => {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  })
+
   // Search content in files
   ipcMain.handle('search-files', async (_, query: string, rootPath: string) => {
     if (!query || !rootPath) return [];

@@ -9,6 +9,9 @@ import { applyTheme, themeNames } from './utils/themeDefinitions';
 const STORAGE_KEYS = {
   theme: 'typora-theme',
   fontSize: 'typora-font-size',
+  autoSave: 'typora-auto-save',
+  autoSaveDelay: 'typora-auto-save-delay',
+  hideScrollbars: 'typora-hide-scrollbars',
 };
 
 interface Tab {
@@ -50,12 +53,24 @@ function App() {
     const saved = localStorage.getItem(STORAGE_KEYS.fontSize);
     return saved ? parseInt(saved, 10) : 16;
   });
+  const [autoSave, setAutoSave] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.autoSave);
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [autoSaveDelay, setAutoSaveDelay] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.autoSaveDelay);
+    return saved ? parseInt(saved, 10) : 5000;
+  });
+  const [hideScrollbars, setHideScrollbars] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.hideScrollbars);
+    return saved === 'true';
+  });
 
   // Editor ref for search commands
   const editorRef = useRef<EditorHandle>(null);
 
   // Stats State
-  const [stats, setStats] = useState({ words: 0, characters: 0, blockType: 'paragraph' });
+  const [stats, setStats] = useState<{ words: number; characters: number; blockType: string; selection?: { words: number; chars: number } | null }>({ words: 0, characters: 0, blockType: 'paragraph', selection: null });
 
   // Zoom State
   const [zoomLevel, setZoomLevel] = useState(100);
@@ -90,8 +105,14 @@ function App() {
     // Check if file is already open
     const existingTab = tabs.find(t => t.path === path);
     if (existingTab) {
-      setActiveTabId(existingTab.id);
+      switchToTab(existingTab.id);
       return;
+    }
+
+    // Save current tab before opening new one
+    const currentTab = tabsRef.current.find(t => t.id === activeTabIdRef.current);
+    if (currentTab?.path && currentTab.isDirty) {
+      saveTabSilently(currentTab);
     }
 
     // Open in new tab
@@ -103,7 +124,7 @@ function App() {
       isDirty: false
     };
 
-    // If current tab is empty (Untitled) and not dirty, replace it? 
+    // If current tab is empty (Untitled) and not dirty, replace it?
     if (tabs.length === 1 && !tabs[0].path && !tabs[0].content && !tabs[0].isDirty) {
       setTabs([newTab]);
     } else {
@@ -174,11 +195,43 @@ function App() {
     setIsRenaming(false);
   };
 
-  const handleStatsUpdate = (newStats: { words: number; characters: number; blockType: string }) => {
+  const handleStatsUpdate = (newStats: { words: number; characters: number; blockType: string; selection?: { words: number; chars: number } | null }) => {
     setStats(newStats);
   };
 
-  // Save Logic
+  // Silent save - saves a tab with an existing path without prompting
+  const saveTabSilently = async (tab: typeof tabs[0]) => {
+    if (!tab.path || !tab.isDirty) return;
+
+    try {
+      recentlySavedRef.current.add(tab.path);
+      setTimeout(() => recentlySavedRef.current.delete(tab.path!), 500);
+
+      await window.electron.writeFile(tab.path, tab.content);
+      setTabs(prev => prev.map(t =>
+        t.id === tab.id ? { ...t, isDirty: false } : t
+      ));
+    } catch (error) {
+      console.error("Silent save failed", error);
+      recentlySavedRef.current.delete(tab.path);
+    }
+  };
+
+  // Switch tab with autosave of current tab
+  const switchToTab = (newTabId: string) => {
+    if (newTabId === activeTabId) return;
+
+    // Save current tab before switching (if it has a path and is dirty)
+    const currentTab = tabsRef.current.find(t => t.id === activeTabId);
+    if (currentTab?.path && currentTab.isDirty) {
+      // Save silently in background
+      saveTabSilently(currentTab);
+    }
+
+    setActiveTabId(newTabId);
+  };
+
+  // Save Logic (with prompt for new files)
   const saveFile = async () => {
     const currentTab = tabsRef.current.find(t => t.id === activeTabIdRef.current);
     if (!currentTab) return;
@@ -325,8 +378,8 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         e.preventDefault();
         editorRef.current?.toggleSourceMode();
       }
-      // Toggle Sidebar: Cmd+Shift+B
-      if (isMod && e.shiftKey && e.key === 'b') {
+      // Toggle Sidebar: Cmd+Shift+L (matches menu.ts)
+      if (isMod && e.shiftKey && e.key === 'l') {
         e.preventDefault();
         setSidebarOpen(prev => !prev);
       }
@@ -369,10 +422,28 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
     window.electron.setNativeTheme(isLightTheme ? 'light' : 'dark');
   };
 
-  // Save fontSize to localStorage when it changes
+  // Save settings to localStorage when they change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.fontSize, fontSize.toString());
   }, [fontSize]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.autoSave, autoSave.toString());
+  }, [autoSave]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.autoSaveDelay, autoSaveDelay.toString());
+  }, [autoSaveDelay]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.hideScrollbars, hideScrollbars.toString());
+    // Apply/remove hide-scrollbars class on html element
+    if (hideScrollbars) {
+      document.documentElement.classList.add('hide-scrollbars');
+    } else {
+      document.documentElement.classList.remove('hide-scrollbars');
+    }
+  }, [hideScrollbars]);
 
   const cycleTheme = () => {
     const currentIndex = themeNames.indexOf(theme);
@@ -387,6 +458,21 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
     // Set native theme for system UI
     const isLightTheme = theme === 'solarizedLight';
     window.electron.setNativeTheme(isLightTheme ? 'light' : 'dark');
+  }, []);
+
+  // Autosave when window loses focus (user switches apps)
+  useEffect(() => {
+    const handleWindowBlur = () => {
+      // Save all dirty tabs that have paths when window loses focus
+      tabsRef.current.forEach(tab => {
+        if (tab.path && tab.isDirty) {
+          saveTabSilently(tab);
+        }
+      });
+    };
+
+    window.addEventListener('blur', handleWindowBlur);
+    return () => window.removeEventListener('blur', handleWindowBlur);
   }, []);
 
   // Listen for zoom changes
@@ -417,7 +503,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
   // Listen for external file changes and reload content
   useEffect(() => {
     const removeListener = window.electron.on('file-changed', async (_: any, data: { eventType: string; fullPath: string }) => {
-      const { fullPath } = data;
+      const { eventType, fullPath } = data;
 
       // Ignore if this was our own save
       if (recentlySavedRef.current.has(fullPath)) {
@@ -428,6 +514,25 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
       const affectedTab = tabsRef.current.find(tab => tab.path === fullPath);
 
       if (affectedTab) {
+        // For rename events (which include deletions), check if file still exists
+        if (eventType === 'rename') {
+          const exists = await window.electron.fileExists(fullPath);
+          if (!exists) {
+            // File was deleted - convert tab to unsaved state so user can save elsewhere
+            // Clear the path so it becomes "Untitled" and mark as dirty
+            setTabs(prev => prev.map(tab =>
+              tab.path === fullPath
+                ? {
+                    ...tab,
+                    path: null,
+                    isDirty: true
+                  }
+                : tab
+            ));
+            return;
+          }
+        }
+
         // Only reload if the tab is not currently dirty (has unsaved changes)
         // This prevents overwriting user's unsaved work
         if (!affectedTab.isDirty) {
@@ -481,6 +586,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             activeContent={activeTab.content}
             width={sidebarWidth}
             onWidthChange={handleSidebarWidthChange}
+            onSettingsClick={() => setIsPreferencesOpen(true)}
           />
         </div>
 
@@ -489,6 +595,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
           themeName={theme}
           wordCount={stats.words}
           lineCount={activeTab.content.split('\n').length}
+          selectionStats={stats.selection}
           onThemeClick={cycleTheme}
           onSourceClick={() => editorRef.current?.toggleSourceMode()}
         />
@@ -549,7 +656,7 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
               return (
                 <div
                   key={tab.id}
-                  onClick={() => setActiveTabId(tab.id)}
+                  onClick={() => switchToTab(tab.id)}
                   className="group flex-shrink-0 min-w-[120px] flex items-center px-4 py-1.5 cursor-pointer text-sm select-none transition-colors"
                   style={{
                     WebkitAppRegion: 'no-drag',
@@ -605,9 +712,15 @@ ${activeTab.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
               isOpen={isPreferencesOpen}
               onClose={() => setIsPreferencesOpen(false)}
               theme={theme}
-              setTheme={setTheme}
+              setTheme={handleThemeSelect}
               fontSize={fontSize}
               setFontSize={setFontSize}
+              autoSave={autoSave}
+              setAutoSave={setAutoSave}
+              autoSaveDelay={autoSaveDelay}
+              setAutoSaveDelay={setAutoSaveDelay}
+              hideScrollbars={hideScrollbars}
+              setHideScrollbars={setHideScrollbars}
             />
 
 

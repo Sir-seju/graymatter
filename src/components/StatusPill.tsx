@@ -5,6 +5,7 @@ interface StatusPillProps {
   wordCount: number;
   lineCount?: number;
   cursorPosition?: { line: number; col: number };
+  selectionStats?: { words: number; chars: number } | null;
   onThemeClick: () => void;
   onSourceClick: () => void;
 }
@@ -14,9 +15,12 @@ const StatusPill: React.FC<StatusPillProps> = ({
   wordCount,
   lineCount = 0,
   cursorPosition,
+  selectionStats,
   onThemeClick,
   onSourceClick
 }) => {
+  const hasSelection = selectionStats && (selectionStats.words > 0 || selectionStats.chars > 0);
+
   return (
     <div
       className="fixed bottom-3 right-3 flex items-center rounded-md px-2 py-1 text-[11px] font-medium z-[100] select-none gap-1"
@@ -42,10 +46,24 @@ const StatusPill: React.FC<StatusPillProps> = ({
         ⌘/
       </button>
       <span style={{ color: 'var(--window-border)' }}>|</span>
-      <span className="opacity-70">{wordCount} words</span>
-      <span style={{ color: 'var(--window-border)' }}>|</span>
-      <span className="opacity-70">{lineCount} lines</span>
-      {cursorPosition && (
+      {hasSelection ? (
+        <span
+          className="opacity-90 px-1.5 py-0.5 rounded"
+          style={{
+            backgroundColor: 'var(--item-hover-bg-color)',
+            color: 'var(--text-color)'
+          }}
+        >
+          {selectionStats.words} words selected ({selectionStats.chars} chars)
+        </span>
+      ) : (
+        <>
+          <span className="opacity-70">{wordCount} words</span>
+          <span style={{ color: 'var(--window-border)' }}>|</span>
+          <span className="opacity-70">{lineCount} lines</span>
+        </>
+      )}
+      {cursorPosition && !hasSelection && (
         <>
           <span style={{ color: 'var(--window-border)' }}>|</span>
           <span className="opacity-70">Ln {cursorPosition.line}, Col {cursorPosition.col}</span>

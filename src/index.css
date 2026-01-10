@@ -40,6 +40,17 @@ body {
   outline: none;
 }
 
+/* Hide scrollbars when setting is enabled */
+html.hide-scrollbars ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+html.hide-scrollbars * {
+  scrollbar-width: none;
+}
+
 /* Sidebar styling using CSS variables */
 .sidebar {
   background-color: var(--side-bar-bg-color);
@@ -441,9 +452,9 @@ pre code,
 .ProseMirror h4,
 .ProseMirror h5,
 .ProseMirror h6 {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  line-height: 1.3;
+  margin-top: 1.8em;
+  margin-bottom: 0.8em;
+  line-height: 1.4;
 }
 
 .ProseMirror h1 {
@@ -485,9 +496,9 @@ pre code,
 
 /* Paragraphs */
 .ProseMirror p {
-  margin-bottom: 0.8em;
+  margin-bottom: 1em;
   margin-top: 0;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 /* Lists */
@@ -638,19 +649,44 @@ pre code,
 .ProseMirror table {
   border-collapse: collapse;
   width: 100%;
-  margin: 1rem 0;
+  margin: 1.5rem 0;
+  table-layout: auto;
+  overflow: hidden;
 }
 
 .ProseMirror th,
 .ProseMirror td {
   border: 1px solid var(--window-border);
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   text-align: left;
+  vertical-align: top;
+  min-width: 80px;
+  position: relative;
 }
 
 .ProseMirror th {
   background-color: var(--side-bar-bg-color);
   font-weight: 600;
+}
+
+/* Table cell selection */
+.ProseMirror .selectedCell {
+  background-color: rgba(var(--primary-color), 0.1);
+}
+
+/* Table column resize handle */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--primary-color);
+  pointer-events: none;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
 }
 
 /* Task Lists */
@@ -864,15 +900,15 @@ html.theme-night .ProseMirror a:hover {
   border-bottom-color: #5d7cbf;
 }
 
-/* Night Theme - Blockquotes - Subtle left border */
+/* Night Theme - Blockquotes - Readable with accent */
 html.theme-night .ProseMirror blockquote {
-  border-left: 3px solid #3a4560 !important;
-  padding: 0.5em 0 0.5em 1.2em !important;
-  margin: 1.2em 0 !important;
-  background: rgba(50, 60, 80, 0.2) !important;
-  color: #707890 !important;
-  border-radius: 0 4px 4px 0 !important;
-  font-style: italic;
+  border-left: 4px solid #5d7cbf !important;
+  padding: 1em 1.5em !important;
+  margin: 1.5em 0 !important;
+  background: rgba(40, 48, 80, 0.4) !important;
+  color: #a0a8c0 !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-style: normal;
 }
 
 /* Night Theme - Code blocks with subtle background */
@@ -1012,24 +1048,57 @@ html.theme-night .ProseMirror blockquote {
   color: #ff79c6;
 }
 
-/* Night Theme - Tables - Subtle styling */
-.theme-night .ProseMirror th,
-.theme-night .ProseMirror td {
-  border-color: #1e2230;
+/* Night Theme - Tables - Lighter, more readable styling */
+.theme-night .ProseMirror table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #2a2f3d;
+  border: 1px solid #262f49;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .theme-night .ProseMirror th {
-  background-color: #171922;
-  color: #5d7cbf;
+  background: #363d50;
+  color: #e0e4f0;
   font-weight: 600;
+  padding: 0.85rem 1.15rem;
+  border: none;
+  border-bottom: 2px solid #4a5575;
+  border-right: 1px solid #4a5575;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+}
+
+.theme-night .ProseMirror th:last-child {
+  border-right: none;
 }
 
 .theme-night .ProseMirror td {
-  background-color: transparent;
+  background-color: #2a2f3d;
+  color: #c8cce0;
+  padding: 0.8rem 1.15rem;
+  border: none;
+  border-bottom: 1px solid #505878;
+  border-right: 1px solid #505878;
+}
+
+.theme-night .ProseMirror td:last-child {
+  border-right: none;
+}
+
+.theme-night .ProseMirror tr:last-child td {
+  border-bottom: none;
+}
+
+.theme-night .ProseMirror tbody tr:nth-child(even) td {
+  background-color: #323848;
 }
 
 .theme-night .ProseMirror tr:hover td {
-  background-color: rgba(50, 60, 80, 0.15);
+  background-color: #3a4258;
 }
 
 /* Night Theme - HR - Subtle gradient */
@@ -1584,35 +1653,27 @@ html.theme-solarizedLight .ProseMirror blockquote {
 .theme-everforest .ProseMirror h6 {
   color: var(--heading-color);
   font-weight: 700;
-  line-height: 1.25;
-  padding-left: 50px;
+  line-height: 1.35;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
 }
 
 .theme-everforest .ProseMirror h1 {
   font-size: 2.1rem;
   border-bottom: 1px solid var(--window-border);
   padding-bottom: 0.4rem;
-  margin-left: 50px;
-  padding-left: 0;
-  display: inline-block;
 }
 
 .theme-everforest .ProseMirror h2 {
   font-size: 1.8rem;
   border-bottom: 1px solid var(--window-border);
   padding-bottom: 0.35rem;
-  margin-left: 50px;
-  padding-left: 0;
-  display: inline-block;
 }
 
 .theme-everforest .ProseMirror h3 {
   font-size: 1.5rem;
   border-bottom: 1px dashed var(--ef-bg-4);
   padding-bottom: 0.25rem;
-  margin-left: 50px;
-  padding-left: 0;
-  display: inline-block;
 }
 
 .theme-everforest .ProseMirror h4 {
@@ -1626,12 +1687,6 @@ html.theme-solarizedLight .ProseMirror blockquote {
 .theme-everforest .ProseMirror h6 {
   font-size: 1rem;
   color: var(--ef-fg-muted);
-}
-
-/* Everforest - Heading badge positioning for indented headers */
-.theme-everforest .heading-node .heading-badge {
-  left: 0 !important;
-  right: auto !important;
 }
 
 /* Everforest - Strong/Bold - GREEN like original Typora */
@@ -1968,14 +2023,15 @@ html.theme-dracula .ProseMirror em {
   font-style: italic !important;
 }
 
-/* Dracula - Blockquotes - Purple accent */
+/* Dracula - Blockquotes - Purple accent with better readability */
 html.theme-dracula .ProseMirror blockquote {
   border-left: 4px solid #bd93f9 !important;
-  padding: 0.5em 1em !important;
-  margin: 1em 0 !important;
-  background: rgba(68, 71, 90, 0.5) !important;
-  color: #6272a4 !important;
-  border-radius: 0 !important;
+  padding: 1em 1.5em !important;
+  margin: 1.5em 0 !important;
+  background: rgba(68, 71, 90, 0.6) !important;
+  color: #f8f8f2 !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-style: normal;
 }
 
 /* Dracula - Code blocks */

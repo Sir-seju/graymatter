@@ -6,8 +6,11 @@ import {
   Copy,
   ExternalLink,
   File,
+  FileCode,
+  FileJson,
   FilePlus,
   Files,
+  FileText,
   Folder,
   FolderOpen,
   FolderPlus,
@@ -15,10 +18,61 @@ import {
   Link,
   Pencil,
   Search,
+  Settings,
   Trash2,
   X
 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+// Custom Markdown icon component
+const MarkdownIcon: React.FC<{ size?: number; className?: string; style?: React.CSSProperties }> = ({ size = 14, className, style }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={style}
+  >
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <path d="M7 15V9l2.5 3L12 9v6" />
+    <path d="M17 12l-2 3h4l-2-3z" />
+  </svg>
+);
+
+// Get appropriate icon for file type
+const getFileIcon = (filename: string, size: number = 14, className: string = "") => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+
+  switch (ext) {
+    case 'md':
+    case 'markdown':
+    case 'mdx':
+      return <MarkdownIcon size={size} className={className} style={{ color: 'var(--primary-color)' }} />;
+    case 'json':
+      return <FileJson size={size} className={className} style={{ color: '#f1c40f' }} />;
+    case 'js':
+    case 'jsx':
+    case 'ts':
+    case 'tsx':
+      return <FileCode size={size} className={className} style={{ color: '#3498db' }} />;
+    case 'css':
+    case 'scss':
+    case 'less':
+      return <FileCode size={size} className={className} style={{ color: '#9b59b6' }} />;
+    case 'html':
+    case 'htm':
+      return <FileCode size={size} className={className} style={{ color: '#e67e22' }} />;
+    case 'txt':
+      return <FileText size={size} className={className} />;
+    default:
+      return <File size={size} className={className} />;
+  }
+};
 
 interface SidebarProps {
   currentPath: string | null;
@@ -30,6 +84,7 @@ interface SidebarProps {
   activeContent?: string;
   width: number;
   onWidthChange: (width: number) => void;
+  onSettingsClick?: () => void;
 }
 
 interface FileNode {
@@ -134,7 +189,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onScrollToLine,
   activeContent,
   width,
-  onWidthChange
+  onWidthChange,
+  onSettingsClick
 }) => {
   const [activeTab, setActiveTab] = useState<'files' | 'search' | 'outline'>('files');
   const [rootPath, setRootPath] = useState<string | null>(null);
@@ -487,7 +543,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleCreateItem = async (name: string) => {
-    const fullPath = `${newItemModal.parentPath}/${name}`;
+    // Auto-add .md extension for files without an extension
+    let finalName = name;
+    if (newItemModal.type === 'file' && !name.includes('.')) {
+      finalName = `${name}.md`;
+    }
+    const fullPath = `${newItemModal.parentPath}/${finalName}`;
     const parentPath = newItemModal.parentPath;
     try {
       if (newItemModal.type === 'file') {
@@ -729,7 +790,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           }
         }}
       >
-        <File size={14} className="mr-2 opacity-50 flex-shrink-0" />
+        {getFileIcon(node.name, 14, "mr-2 flex-shrink-0")}
         {isRenaming ? (
           <input
             autoFocus
@@ -771,7 +832,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Traffic light spacer - no border in this area */}
           <div className="h-[52px]" style={{ WebkitAppRegion: 'drag' } as any} />
 
-          <div className="flex flex-col items-center gap-1 flex-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <div className="flex flex-col items-center gap-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div
               className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 hover:opacity-100"
               style={{
@@ -840,6 +901,29 @@ const Sidebar: React.FC<SidebarProps> = ({
               title="Outline"
             >
               <AlignLeft size={18} />
+            </div>
+          </div>
+
+          {/* Settings button at the bottom */}
+          <div className="flex flex-col items-center" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <div
+              className="w-9 h-9 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 hover:opacity-100"
+              style={{
+                backgroundColor: 'transparent',
+                opacity: 0.5
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--item-hover-bg-color)';
+                e.currentTarget.style.opacity = '0.9';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.opacity = '0.5';
+              }}
+              onClick={onSettingsClick}
+              title="Settings"
+            >
+              <Settings size={18} />
             </div>
           </div>
         </div>

@@ -3,6 +3,12 @@ import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
 import Typography from '@tiptap/extension-typography';
@@ -17,13 +23,15 @@ import { HeadingExtension } from './extensions/HeadingExtension';
 import { InlineMathExtension } from './extensions/InlineMathExtension';
 import { MathExtension } from './extensions/MathExtension';
 import { Search } from './extensions/SearchExtension';
+import BlockMenu from './BlockMenu';
 
 // Source Mode Editor Component - Typora-style with syntax highlighting
 const SourceModeEditor: React.FC<{
   content: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   fontSize: number;
-}> = ({ content, onChange, fontSize }) => {
+}> = ({ content, onChange, onBlur, fontSize }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,10 +62,10 @@ const SourceModeEditor: React.FC<{
       const textarea = e.currentTarget;
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const newValue = content.substring(0, start) + '  ' + content.substring(end);
+      const newValue = content.substring(0, start) + '    ' + content.substring(end);
       onChange(newValue);
       setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
       }, 0);
     }
   };
@@ -283,6 +291,7 @@ const SourceModeEditor: React.FC<{
           onChange={(e) => onChange(e.target.value)}
           onScroll={handleScroll}
           onKeyDown={handleKeyDown}
+          onBlur={onBlur}
           placeholder="Type your markdown source here..."
           spellCheck={false}
           wrap="soft"
@@ -335,7 +344,7 @@ interface EditorProps {
   basePath?: string | null;
   searchQuery?: string;
   onSave?: (content: string) => void;
-  onStatsUpdate?: (stats: { words: number; characters: number; blockType: string }) => void;
+  onStatsUpdate?: (stats: { words: number; characters: number; blockType: string; selection?: { words: number; chars: number } | null }) => void;
   theme: string;
   fontSize: number;
 }
@@ -382,7 +391,21 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
       const characters = editor.storage.characterCount?.characters() || 0;
       const selection = editor.state.selection;
       const blockType = selection.$head.parent.type.name;
-      onStatsUpdate({ words, characters, blockType });
+
+      // Calculate selection stats
+      let selectionStats: { words: number; chars: number } | null = null;
+      if (!selection.empty) {
+        const selectedText = editor.state.doc.textBetween(selection.from, selection.to, ' ');
+        if (selectedText.length > 0) {
+          const selWords = selectedText.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+          selectionStats = {
+            words: selWords,
+            chars: selectedText.length
+          };
+        }
+      }
+
+      onStatsUpdate({ words, characters, blockType, selection: selectionStats });
     }
   };
 
@@ -453,6 +476,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
       Highlight,
       Typography,
       Underline,
+      Superscript,
+      Subscript,
       Image.configure({
         inline: true,
         allowBase64: true,
@@ -476,6 +501,15 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
         nested: true,
       }),
       TaskList,
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'prose-table',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Markdown.configure({
         html: true, // Enable HTML
         breaks: true, // Treat newlines as hard breaks
@@ -530,6 +564,74 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
         return false;
       },
       handleKeyDown: (view, event) => {
+        const TAB_SIZE = 4; // Standard tab size
+        const TAB_CHARS = '    '; // 4 spaces
+
+        // Handle Tab key - insert tab (4 spaces)
+        if (event.key === 'Tab' && !event.shiftKey) {
+          event.preventDefault();
+          const { state, dispatch } = view;
+          const { tr } = state;
+          dispatch(tr.insertText(TAB_CHARS));
+          return true;
+        }
+
+        // Handle Backspace - smart delete for indentation
+        if (event.key === 'Backspace') {
+          const { state } = view;
+          const { $from, empty } = state.selection;
+
+          // Only handle if selection is collapsed (no text selected)
+          if (empty) {
+            const pos = $from.pos;
+            const start = $from.start(); // Start of current text block
+            const textBefore = state.doc.textBetween(start, pos, '\0', '\0');
+
+            // Check if text before cursor ends with spaces
+            if (textBefore.length > 0) {
+              const trailingSpaces = textBefore.match(/( +)$/);
+              if (trailingSpaces) {
+                const spacesCount = trailingSpaces[1].length;
+                // Delete to the previous tab stop
+                const deleteCount = spacesCount % TAB_SIZE === 0 ? TAB_SIZE : spacesCount % TAB_SIZE;
+
+                if (spacesCount >= deleteCount) {
+                  event.preventDefault();
+                  view.dispatch(state.tr.delete(pos - deleteCount, pos));
+                  return true;
+                }
+              }
+            }
+          }
+        }
+
+        // Handle Enter on empty list item to exit list
+        if (event.key === 'Enter' && !event.shiftKey) {
+          const { state } = view;
+          const { $from } = state.selection;
+          const parent = $from.parent;
+
+          // Check if we're in an empty list item
+          if (parent.type.name === 'paragraph' && parent.content.size === 0) {
+            const listItem = $from.node(-1);
+            if (listItem && listItem.type.name === 'listItem') {
+              // Check if list item only contains this empty paragraph
+              if (listItem.childCount === 1 && listItem.firstChild?.content.size === 0) {
+                // Use TipTap's liftListItem to exit the list
+                const { tr } = state;
+                const listItemPos = $from.before(-1);
+
+                // Try to lift the list item out
+                view.dispatch(
+                  tr.delete(listItemPos, listItemPos + listItem.nodeSize)
+                    .insert(listItemPos, state.schema.nodes.paragraph.create())
+                );
+                return true;
+              }
+            }
+          }
+        }
+
         // We let the extensions (Math, InlineMath) handle standard input rules.
         // This avoids conflicts where custom logic fights with Tiptap's transaction system.
         return false;
@@ -546,6 +648,13 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
     },
     onSelectionUpdate: ({ editor }) => {
       updateStats(editor);
+    },
+    onBlur: ({ editor }) => {
+      // Autosave when editor loses focus
+      const markdown = editor.storage.markdown.getMarkdown();
+      if (viewMode === 'preview' && onSave) {
+        onSave(markdown);
+      }
     },
   });
 
@@ -1022,15 +1131,24 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto w-full" id="typora-content-area">
+      <div className="flex-1 overflow-y-auto w-full relative" id="typora-content-area">
         {viewMode === 'preview' ? (
-          <EditorContent editor={editor} className="min-h-full" />
+          <>
+            <EditorContent editor={editor} className="min-h-full" />
+            <BlockMenu editor={editor} />
+          </>
         ) : (
           <SourceModeEditor
             content={content}
             onChange={(value) => {
               setContent(value);
               onSave && onSave(value);
+            }}
+            onBlur={() => {
+              // Autosave when source mode editor loses focus
+              if (onSave) {
+                onSave(content);
+              }
             }}
             fontSize={fontSize}
           />
