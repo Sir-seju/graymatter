@@ -154,7 +154,8 @@ pre code,
 
 .source-mode-container textarea {
   font-family: inherit;
-  tab-size: 2;
+  tab-size: 4;
+  -moz-tab-size: 4;
 }
 
 .source-mode-container textarea::placeholder {
@@ -196,6 +197,12 @@ pre code,
 .source-syntax {
   color: var(--control-text-color);
   opacity: 0.6;
+}
+
+/* Tab marker - shows bullet in source mode but faded */
+.source-tab {
+  color: var(--control-text-color);
+  opacity: 0.3;
 }
 
 .source-heading {
@@ -390,6 +397,10 @@ pre code,
   word-wrap: break-word;
   overflow-wrap: break-word;
   letter-spacing: -0.01em;
+  /* Enable tab character display */
+  white-space: pre-wrap;
+  tab-size: 4;
+  -moz-tab-size: 4;
 }
 
 /* Smooth caret */

@@ -71,4 +71,14 @@ export const InlineMathExtension = Node.create({
       }),
     ];
   },
+
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: any, node: any) {
+          state.write('$' + node.textContent + '$');
+        },
+      },
+    };
+  },
 });

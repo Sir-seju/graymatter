@@ -19,10 +19,12 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { Markdown } from 'tiptap-markdown';
 import CodeBlockComponent from './CodeBlockComponent';
 import { CodeBlockPrism } from './extensions/CodeBlockPrism';
+import { DisableIndentCodeBlock } from './extensions/DisableIndentCodeBlock';
 import { HeadingExtension } from './extensions/HeadingExtension';
 import { InlineMathExtension } from './extensions/InlineMathExtension';
 import { MathExtension } from './extensions/MathExtension';
 import { Search } from './extensions/SearchExtension';
+import { TabExtension } from './extensions/TabExtension';
 import BlockMenu from './BlockMenu';
 
 // Source Mode Editor Component - Typora-style with syntax highlighting
@@ -55,17 +57,17 @@ const SourceModeEditor: React.FC<{
     }
   }, []);
 
-  // Handle tab key for indentation
+  // Handle tab key in source mode - insert actual tab character
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       const textarea = e.currentTarget;
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const newValue = content.substring(0, start) + '    ' + content.substring(end);
+      const newValue = content.substring(0, start) + '\t' + content.substring(end);
       onChange(newValue);
       setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 4;
+        textarea.selectionStart = textarea.selectionEnd = start + 1;
       }, 0);
     }
   };
@@ -83,6 +85,9 @@ const SourceModeEditor: React.FC<{
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
+
+    // Replace tab characters with visible marker (bullet + spaces) like Typora
+    highlighted = highlighted.replace(/\t/g, '<span class="source-tab">•   </span>');
 
     // Headers (# ## ### etc) - color the hash marks
     highlighted = highlighted.replace(
@@ -510,44 +515,15 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
       TableRow,
       TableHeader,
       TableCell,
+      TabExtension,
+      DisableIndentCodeBlock,
       Markdown.configure({
         html: true, // Enable HTML
         breaks: true, // Treat newlines as hard breaks
         transformPastedText: true,
         transformCopiedText: true,
         bulletListMarker: '-',
-        extensions: [
-          // Disable indented code blocks (4-space indent should NOT create code blocks)
-          {
-            name: 'disableIndentedCodeBlock',
-            parse: {
-              setup(md: any) {
-                // Disable the 'code' rule which handles indented code blocks
-                md.block.ruler.disable('code');
-              }
-            }
-          },
-          // Serializers: Tiptap Nodes -> Markdown
-          {
-            name: 'math',
-            toMarkdown: {
-              block(state: any, node: any) {
-                // node.attrs.latex is ALREADY the clear text (parsed by extension)
-                state.write('$$\n' + (node.attrs.latex || '') + '\n$$');
-                state.closeBlock(node);
-              }
-            }
-          },
-          {
-            name: 'inlineMath',
-            toMarkdown: {
-              inline(state: any, node: any) {
-                state.write('$' + node.textContent + '$');
-              }
-            }
-          }
-        ]
-      } as any),
+      }),
     ],
     // Let Markdown extension handle the initial content parsing
     content: initialContent,
@@ -574,46 +550,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({
         return false;
       },
       handleKeyDown: (view, event) => {
-        const TAB_SIZE = 8; // Tab size (8 spaces)
-        const TAB_CHARS = '        '; // 8 spaces
-
-        // Handle Tab key - insert tab (8 spaces)
-        if (event.key === 'Tab' && !event.shiftKey) {
-          event.preventDefault();
-          const { state, dispatch } = view;
-          const { tr } = state;
-          dispatch(tr.insertText(TAB_CHARS));
-          return true;
-        }
-
-        // Handle Backspace - smart delete for indentation
-        if (event.key === 'Backspace') {
-          const { state } = view;
-          const { $from, empty } = state.selection;
-
-          // Only handle if selection is collapsed (no text selected)
-          if (empty) {
-            const pos = $from.pos;
-            const start = $from.start(); // Start of current text block
-            const textBefore = state.doc.textBetween(start, pos, '\0', '\0');
-
-            // Check if text before cursor ends with spaces
-            if (textBefore.length > 0) {
-              const trailingSpaces = textBefore.match(/( +)$/);
-              if (trailingSpaces) {
-                const spacesCount = trailingSpaces[1].length;
-                // Delete to the previous tab stop (8 spaces)
-                const deleteCount = spacesCount % TAB_SIZE === 0 ? TAB_SIZE : spacesCount % TAB_SIZE;
-
-                if (spacesCount >= deleteCount) {
-                  event.preventDefault();
-                  view.dispatch(state.tr.delete(pos - deleteCount, pos));
-                  return true;
-                }
-              }
-            }
-          }
-        }
+        // Tab/Shift-Tab/Backspace for tabs handled by TabExtension
 
         // Handle Enter on empty list item to exit list
         if (event.key === 'Enter' && !event.shiftKey) {

@@ -72,5 +72,16 @@ export const MathExtension = Node.create({
       }),
     ]
   },
+
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: any, node: any) {
+          state.write('$$\n' + (node.attrs.latex || '') + '\n$$');
+          state.closeBlock(node);
+        },
+      },
+    };
+  },
 });
 
